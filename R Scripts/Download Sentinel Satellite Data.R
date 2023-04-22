@@ -45,3 +45,4 @@ grid::grid.raster(rawPng)
 
 #Save to file
 png::writePNG(rawPng, target="satelliteimage.png")
+
