@@ -44,5 +44,5 @@ rawPng = content(response)
 grid::grid.raster(rawPng)
 
 #Save to file
-png::writePNG(rawPng, target="satelliteimage.png")
+png::writePNG(rawPng, target="Visualisations/cloudyzoomedoutraqqa.png")
 
