@@ -1,0 +1,31 @@
+{
+    "input": {
+        "bounds": {
+            "properties": {
+                "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+            },
+            "bbox": [
+                13.822174072265625,
+                45.85080395917834,
+                14.55963134765625,
+                46.29191774991382
+            ]
+        },
+        "data": [
+            {
+                "type": "sentinel-2-l1c",
+                "dataFilter": {
+                    "timeRange": {
+                        "from": "2018-10-01T00:00:00Z",
+                        "to": "2018-12-31T00:00:00Z"
+                    }
+                }
+            }
+        ]
+    },
+    "output": {
+        "width": 512,
+        "height": 512
+    },
+    "evalscript": "//VERSION=3\n\nfunction setup() {\n  return {\n    input: [\"B02\", \"B03\", \"B04\"],\n    output: { \n      bands: 3,\n      sampleType: \"AUTO\" // default value - scales the output values from [0,1] to [0,255].   \n     }\n  }\n}\n\nfunction evaluatePixel(sample) {\n  return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02]\n}"
+}
