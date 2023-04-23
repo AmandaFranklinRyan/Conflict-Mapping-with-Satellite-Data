@@ -1,3 +1,5 @@
+# Leaflet/ documentation:https://rdrr.io/cran/leaflet/man/addLegend.html
+
 library(leaflet)
 library(dplyr)
 library(rio)
@@ -77,8 +79,38 @@ grouped_damage_plot <-   destroyed_only_dataframe %>%
                    radius = 3, 
                    stroke=FALSE,
                    fillOpacity= 1,
-                   color = ~destruction_palette(destruction_type), 
+                   color = "#92140d", 
                    label=~SiteID,
                    group="Destroyed")  
 
+# Dataframe with only severely damaged buildings
+severe_damage_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(destruction_type=="Severe Damage")
 
+#Create severe damage layer
+grouped_damage_plot <- grouped_damage_plot %>% 
+  addCircleMarkers(lng=severe_damage_only_dataframe$coords.x1, 
+                   lat=severe_damage_only_dataframe$coords.x2,
+                   radius = 3, 
+                   stroke=FALSE,
+                   fillOpacity= 1,
+                   color = "#ce5e09", 
+                   label=~SiteID,
+                   group="Severe Damage") %>% 
+                   addLayersControl(overlayGroups = c("Destroyed", "Severe Damage"))
+
+# Dataframe with only moderately damaged buildings
+moderate_damage_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(destruction_type=="Moderate Damage")
+
+#Create moderate damage layer
+grouped_damage_plot <- grouped_damage_plot %>% 
+  addCircleMarkers(lng=moderate_damage_only_dataframe$coords.x1, 
+                   lat=moderate_damage_only_dataframe$coords.x2,
+                   radius = 3, 
+                   stroke=FALSE,
+                   fillOpacity= 1,
+                   color = "#ffa600", 
+                   label=~SiteID,
+                   group="Moderate Damage") %>% 
+                   addLayersControl(overlayGroups = c("Destroyed", "Severe Damage", "Moderate Damage"))
