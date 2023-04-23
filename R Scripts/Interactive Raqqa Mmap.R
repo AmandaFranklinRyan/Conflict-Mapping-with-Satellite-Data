@@ -1,6 +1,8 @@
 library(leaflet)
 library(dplyr)
 library(rio)
+library(leaflet.extras) # for extra features like adding search box and reset map button
+library(htmltools) #for escaping html
 
 ###--- Create interactive leaflet map of Raqqa
 
@@ -40,20 +42,43 @@ map_raqqa_annotated <-map_raqqa %>%
                             destruction_type,
                             "</b>"))
 
-###--- Create plot illustrating distribution of destroyed, moderately damaged and destroyed buildings
+###--- Create plot illustrating distribution of destroyed, moderately damaged and destroyed buildings---
 
 # Create custom destruction colour palette
 destruction_palette <- leaflet::colorFactor(palette=c("#92140d","#ce5e09","#ffa600"),
                                             levels=c("Destroyed","Severe Damage","Moderate Damage"))
-
 destruction_level_plot <- map_raqqa %>% 
   clearMarkers() %>%  #clear large pin markers
   addCircleMarkers(lng=coalition_strikes_2017$coords.x1, lat=coalition_strikes_2017$coords.x2,
-                   radius = 2, stroke=FALSE, color = ~destruction_palette(destruction_type), label=~SiteID) %>% 
+                   radius = 2, stroke=FALSE, fillOpacity=0.9,color = ~destruction_palette(destruction_type), label=~SiteID) %>% 
   addLegend(pal = destruction_palette,
             values = c("Destroyed","Severe Damage","Moderate Damage"),
             title = "Level of Destruction",
-            position = "topleft")
-  
+            position = "bottomright") %>% 
+            leaflet.extras::addResetMapButton()
+
+###--- Recreate above plot with groups to stop it looking so cluttered---
+
+# Dataframe with only destroyed buildings
+destroyed_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(destruction_type=="Destroyed")
+
+grouped_damage_plot <-   destroyed_only_dataframe %>%
+  leaflet()%>% 
+  addProviderTiles("CartoDB") %>% 
+  setView(lng=39.00897, lat= 35.95394, zoom=14) %>% 
+  setMaxBounds(lng1 = 39.05947, 
+               lat1 = 35.9745, 
+               lng2 = 38.93641, 
+               lat2 = 35.92829) %>% 
+  clearMarkers() %>%  
+  addCircleMarkers(lng=destroyed_only_dataframe$coords.x1, 
+                   lat=destroyed_only_dataframe$coords.x2,
+                   radius = 3, 
+                   stroke=FALSE,
+                   fillOpacity= 1,
+                   color = ~destruction_palette(destruction_type), 
+                   label=~SiteID,
+                   group="Destroyed")  
 
 
