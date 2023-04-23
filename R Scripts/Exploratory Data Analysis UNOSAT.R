@@ -7,8 +7,6 @@ library(formattable)
 #Load UNOSAT data in dataframe form
 raqqa_data <- readRDS("Datasets/Reshaped UNOSAT data.rds")
 
-colnames(raqqa_data)
-
 raqqa_data_summarised <- raqqa_data %>% 
   select(SiteID,Neigh,damage_year,destruction_type,coords.x1,coords.x2) %>% 
   mutate(damage_year=lubridate::ymd(damage_year))
@@ -61,34 +59,18 @@ formatted_table <- formattable(coalition_bombing,
                                align=c("l","l"))
 
 #3. Which neighbourhoods were targeted?
-neighbourhoods_targeted <- destroyed_no_nas %>% 
-  select(SiteID, Neigh, destroyed_year) %>% 
-  group_by(destroyed_year,Neigh) %>% 
+neighbourhoods_targeted <- raqqa_data_summarised %>% 
+  group_by(damage_year,Neigh) %>% 
   summarise(sum(total=n())) %>% 
   arrange(sum(total=n())) %>% 
-  ungroup() %>% 
-  dplyr::filter(sum(total=n()) > 5)
+  ungroup()
+
+# What are the coordinates for the bounding box around Raqqa (needed for download of Sentinel data))
+max_x1 <- max(raqqa_data_summarised$coords.x1)
+min_x1 <- min(raqqa_data_summarised$coords.x1)
+max_x2 <- max(raqqa_data_summarised$coords.x2)
+min_x2 <- min(raqqa_data_summarised$coords.x2)
 
 
 
 
-colnames(buildings_destroyed)
-
-
-#Identify dates of building destruction
-
-
-nrow(raqqa_summarised)
-
-sum(is.na(raqqa_summarised$DaSitCl))
-
-nrow(raqqa_summarised)
-
-#Identify dates of building destruction
-
-
-
-# 1. How many of each type of building have been destroyed, damaged etc?
-unique(raqqa_summarised$SiteID) # list of building types
-unique(raqqa_summarised$DaSitCl)
-unique(raqqa_summarised$DaSitCl)
