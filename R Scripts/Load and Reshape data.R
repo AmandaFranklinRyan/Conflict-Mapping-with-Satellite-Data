@@ -1,4 +1,4 @@
-library(rgdal)
+library(rgdal) # loading spacial data
 library(sp)
 library(raster)
 library(dplyr)
@@ -29,20 +29,14 @@ raqqa_data@coords
 #plot raqqa data
 plot(raqqa_data)
 
-###--- Exploratory data analysis ---
-# Convert spacial dataframe to dataframe and clean
-
-raqqa_dataframe <- as.data.frame(raqqa_data)
-
-colnames(raqqa_dataframe)
-unique(raqqa_dataframe$DaSitCl)
-
 ###--- Reshape Data ---
 
 # Reshape data to find year when buildings were identified as "Destroyed", "Moderate Damage" or "Severe Damage"
 # Buildings can remain destroyed over time or be rebuilt, it's important not to double count
 # For the purposes of this analysis the same building can only be classified as damaged/destroyed once
 # even if in reality it has been bombed and rebuilt several times, this could lead to under counting destruction
+
+raqqa_dataframe <- as.data.frame(raqqa_data)
 
 # Remove duplicate rows
 raqqa_dataframe <-raqqa_dataframe %>% 
@@ -104,64 +98,3 @@ moderate_damage_dataframe <- moderate_damaged_dates %>%
 
 raqqa_dataframe_reshaped <- rbind(severe_damage_dataframe, moderate_damage_dataframe, destroyed_dataframe)
 
-undefined_damaged_dates <- moderate_damaged_dates %>% 
-  filter(is.na(destruction_type))
-
-
-
-
-
-#Total number of buildings destroyed
-destroyed_no_nas <- destroyed_dates %>% 
-  filter(!is.na(destroyed_year))
-
-no_building_destroyed <- destroyed_no_nas %>% 
-  group_by(destroyed_year) %>% 
-  summarise(n())
-# Over 3000 buildings destroyed, 2470 between March and October 2017 during coalition airstrikes
-
-#1. What kind of buildings were destroyed?
-
-# Select destruction of columns by date showing all results where at least 3 buildings of that type have been destroyed
-buildings_destroyed <- destroyed_no_nas %>% 
-  select(SiteID, Neigh, destroyed_year) %>% 
-  group_by(destroyed_year,SiteID) %>% 
-  summarise(sum(total=n())) %>% 
-  arrange(sum(total=n())) %>% 
-  ungroup() %>% 
-  dplyr::filter(sum(total=n()) > 5)
-
-top_buildings_destroyed <- dplyr::rename(buildings_destroyed, total=`sum(total=n())`)
-
-#2. Which neighbourhoods were targeted?
-neighbourhoods_targeted <- destroyed_no_nas %>% 
-  select(SiteID, Neigh, destroyed_year) %>% 
-  group_by(destroyed_year,Neigh) %>% 
-  summarise(sum(total=n())) %>% 
-  arrange(sum(total=n())) %>% 
-  ungroup() %>% 
-  dplyr::filter(sum(total=n()) > 5)
-
-
-
-
-colnames(buildings_destroyed)
- 
-
-#Identify dates of building destruction
-
-
-nrow(raqqa_summarised)
-
-sum(is.na(raqqa_summarised$DaSitCl))
-
-nrow(raqqa_summarised)
-
-#Identify dates of building destruction
-
-
-
-# 1. How many of each type of building have been destroyed, damaged etc?
-unique(raqqa_summarised$SiteID) # list of building types
-unique(raqqa_summarised$DaSitCl)
-unique(raqqa_summarised$DaSitCl)
