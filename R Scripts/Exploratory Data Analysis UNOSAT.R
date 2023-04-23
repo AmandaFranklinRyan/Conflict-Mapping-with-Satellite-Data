@@ -37,7 +37,7 @@ damage_plot <- ggplot(data=no_building_destroyed, aes(x=damage_year, y=`n()`, fi
   scale_x_discrete( labels= year_labels)+
   ggtitle("Severity of damage to buildings in Raqqa (2013-2017)")
   
-###2. What kind of buildings were destroyed?
+### 2. What kind of buildings were destroyed?
 
 # Calculate type of buildings destroyed by year
 buildings_destroyed <- raqqa_data_summarised %>% 
@@ -56,15 +56,11 @@ names(coalition_bombing) <- c('Year','Building type','Number')
 coalition_bombing <- coalition_bombing %>% 
   select(`Building type`, Number)
 
-coalition_bombing_data_table <- as.data.table(keywords_by_date)
-formatted_table <- formattable(keywords_data_table, 
+coalition_bombing_data_table <- as.data.table(coalition_bombing)
+formatted_table <- formattable(coalition_bombing, 
                                align=c("l","l"))
 
-
-
-top_buildings_destroyed <- dplyr::rename(buildings_destroyed, total=`sum(total=n())`)
-
-#2. Which neighbourhoods were targeted?
+#3. Which neighbourhoods were targeted?
 neighbourhoods_targeted <- destroyed_no_nas %>% 
   select(SiteID, Neigh, destroyed_year) %>% 
   group_by(destroyed_year,Neigh) %>% 
