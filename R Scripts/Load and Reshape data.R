@@ -98,3 +98,5 @@ moderate_damage_dataframe <- moderate_damaged_dates %>%
 
 raqqa_dataframe_reshaped <- rbind(severe_damage_dataframe, moderate_damage_dataframe, destroyed_dataframe)
 
+saveRDS(raqqa_dataframe_reshaped,"Datasets/Reshaped UNOSAT data.rds")
+
