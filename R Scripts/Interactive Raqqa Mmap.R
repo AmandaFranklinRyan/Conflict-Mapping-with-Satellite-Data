@@ -28,8 +28,32 @@ setMaxBounds(lng1 = 39.05947,
                lat2 = 35.92829)
 
 ###--- Add locations of bombed buildings from October 2017 Coalition bombing
+#colour for entity and degree of destruction
 
 map_raqqa_annotated <-map_raqqa %>% 
   clearMarkers() %>%  #clear large pin markers
   addCircleMarkers(lng=coalition_strikes_2017$coords.x1, lat=coalition_strikes_2017$coords.x2,
-             radius = 0.1, color = "#790C0E", popup = ~SiteID)
+             radius = 0.1, color = "#790C0E", 
+             label = ~paste0(SiteID, # label displays info on hover, pop-up displays on click
+                            "<br/>",
+                            "<b>",
+                            destruction_type,
+                            "</b>"))
+
+###--- Create plot illustrating distribution of destroyed, moderately damaged and destroyed buildings
+
+# Create custom destruction colour palette
+destruction_palette <- leaflet::colorFactor(palette=c("#92140d","#ce5e09","#ffa600"),
+                                            levels=c("Destroyed","Severe Damage","Moderate Damage"))
+
+destruction_level_plot <- map_raqqa %>% 
+  clearMarkers() %>%  #clear large pin markers
+  addCircleMarkers(lng=coalition_strikes_2017$coords.x1, lat=coalition_strikes_2017$coords.x2,
+                   radius = 2, stroke=FALSE, color = ~destruction_palette(destruction_type), label=~SiteID) %>% 
+  addLegend(pal = destruction_palette,
+            values = c("Destroyed","Severe Damage","Moderate Damage"),
+            title = "Level of Destruction",
+            position = "topleft")
+  
+
+
