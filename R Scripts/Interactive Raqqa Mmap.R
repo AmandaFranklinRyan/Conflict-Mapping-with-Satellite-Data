@@ -20,7 +20,7 @@ coalition_strikes_2017 <- unosat_data %>%
 #Possible lap tile options: CartoDB, Esri, OpenStreetMap
 map_raqqa <- coalition_strikes_2017 %>% 
   leaflet()%>% 
-  addProviderTiles("CartoDB") %>% 
+  addProviderTiles("Esri") %>% 
   
 # Set centre of map
 setView(lng=39.00897, lat= 35.95394, zoom=14) %>% #centred on Raqqa from UNOSAT data
@@ -52,8 +52,13 @@ destruction_palette <- leaflet::colorFactor(palette=c("#92140d","#ce5e09","#ffa6
 destruction_level_plot <- map_raqqa %>% 
   clearMarkers() %>%  #clear large pin markers
   addCircleMarkers(lng=coalition_strikes_2017$coords.x1, lat=coalition_strikes_2017$coords.x2,
-                   radius = 2, stroke=FALSE, fillOpacity=0.9,color = ~destruction_palette(destruction_type), label=~SiteID) %>% 
-  addLegend(pal = destruction_palette,
+                   radius = 2, 
+                   stroke=FALSE, 
+                   fillOpacity=0.9,
+                   color = ~destruction_palette(destruction_type),
+                   label=~SiteID) %>% 
+                   #clusterOptions = markerClusterOptions())# For clustering points
+            addLegend(pal = destruction_palette,
             values = c("Destroyed","Severe Damage","Moderate Damage"),
             title = "Level of Destruction",
             position = "bottomright") %>% 
