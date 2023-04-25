@@ -71,6 +71,11 @@ min_x1 <- min(raqqa_data_summarised$coords.x1)
 max_x2 <- max(raqqa_data_summarised$coords.x2)
 min_x2 <- min(raqqa_data_summarised$coords.x2)
 
+# What are the coordinates of the "centre" of the city?
+
+centre_x1 <- mean(raqqa_data_summarised$coords.x1)
+centre_x2 <- mean(raqqa_data_summarised$coords.x2)
+
 
 
 

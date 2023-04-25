@@ -1,0 +1,49 @@
+---
+title: "Propaganda Wars"
+author: "Amanda Franklin-Ryan"
+date: "2023-04-25"
+output: html_document
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+### Atrocity Propaganda
+
+*"History stopped in 1936- after that, there was only propaganda"* - **George Orwell**
+
+*"We are children no more"*, 15-year-old 'Nayirah'" tells the Congressional Caucus, blinking back tears, her voice cracking as she describes Iraqi soldiers storming the hospital where she volunteered, stealing incubators and throwing babies onto the floor to die.[@guyjohn592010] It's 1991, Vietnam's legacy still looms large and the American public have no desire to be embroiled in yet another distant war, but Nayirah's testimony sways them with the US invading Iraq 3-months later. Except it wasn't true, any of it. Nayirah al-Sabah, the daughter of the Kuwaiti ambassador had never set foot in the hospital, instead she was coached to perfection for her Oscar winning performance by PR firm Hill and Knowlton who were directly employed by the Kuwaiti Government.[@abuhamad1994] [@howfals]
+
+Atrocity propaganda is nothing new, with lurid tales of fabricated massacres stretching back to the Crusades, but now storytelling is easier than ever before; all you need is a mobile and internet connection. There are now more hours of Syrian conflict footage online, than time elapsed since the war started.Almost five million people are currently trapped in Khartoum as Sudanese generals Abdel Fattah al-Burhan and Mohamed Hamdan Daglo vie for power and Twitter is awash with fake footage taken from conflicts in Yemen, Libya and even a computer game.[@tanksan] With most Twitter accounts geolocation data switched off, it's game on for opportunists worldwide to create and share their own realities. Even with image metadata and reverse image search, it's almost impossible to ascertain whether shared images are accurate, misrepresentative, staged or concocted by government backed bots. Dali2 will only make things worse, with the potential power to conjure up bespoke atrocities in every style from gritty World War II grayscale to heartrending full colour closeup.
+
+Yet in a world where fiction seems higher definition than reality, satellite imagery could offer a glimmer of hope. In March 2022 Ukrainians reported the rape, murder and torture of hundreds of civilians in Bucha, with bodies strewn across the streets. Unsurprisingly, the Russian Defence Ministry immediately dismissed the allegations as, "another production of the Kyiv regime for the Western media", blaming Ukrainian soldiers themselves for the killings. [@mirovalev]However Maxar satellite data corroborated the Ukrainian narrative illustrating the bodies had been present long before Ukrainian forces entered the area.[@buchaki2022]
+
+While high resolution Maxar data is only available commercially or for selected humanitarian disasters, medium resolution Sentinel-1 and Sentinel 2 satellite imagery is freely accessible online. Evidently it's no magic bullet. evidence of newly dug mass graves or bombed buildings, proves only the incident is not a recycled copy-paste of a past atrocity and in isolation can rarely identify the true perpetrator, however it is already being used in conflict mapping. Depending on the location and nature of the violence, burning oil wells; abandoning agricultural land, (pictures here) construction of refugee camps and building damage have been used to identify and monitor armed conflict.
+
+### Raqqa: The Perfect Perpetratorless Crime
+
+Launched in 2019, Amnesty International's [Strike Tracker](https://decoders.amnesty.org/projects/strike-tracker#decode-results) used satellite imagery coupled with crowd sourced image labelling to create an accurate timeline for the 2017 US led Coalition bombing in the Syrian city of Raqqa. Attempting to destroy Islamic State's "Caliphate", Coalition forces fired over 30,000 missiles in a four-month bombardment, destroying 80% of the city and killing and injuring thousands of civilians. Pinning down responsibility was challenging as the Coalition accused ISIS, Russia blamed the US and the US denied all responsibility ruling less than one percent of civilian casualty reports "credible".[@april252019]
+
+Amnesty International enlisted thousands of digital activists to analyse a series of satellite photos of the same building to identify the exact date it was destroyed. After following a short interactive tutorial volunteers were presented with a new series of images to label. Combining the crowd sourced strike timeline with witness testimony and interviews, Amnesty forced the Coalition to admit responsibility for 159 civilian deaths.[@isconfl2019]
+
+This project aims to collect the dataset necessary to replicate Amnesty's Strike Tracker Project. However instead of using high resolution human labelled satellite images, medium resolution Sentinel-1 and Sentinel-2 images will be downloaded and in a future seminar paper (hopefully) used to investigate the efficacy of using machine learning methods to automatically detect building damage and to generate a destruction timeline using a simplified version of the methodology described in x. More specifically the project will:
+
+Identify and download suitable satellite images from the SentinelHub API, an R wrapper will also be written to simplify this process Collect and visualise data from UNOSAT illustrating the position of the coalition strikes (for the purposes of the future machine learning model this represents the ground truth) Download series of news articles from Guardian/New York Times API illustrating who different media outlets hold responsible for the civilian deaths.
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
