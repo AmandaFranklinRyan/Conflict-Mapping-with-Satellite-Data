@@ -19,7 +19,8 @@
                         "from": "InsertStartDateHereT00:00:00Z",
                         "to": "InsertEndDateHereT00:00:00Z"
                     },
-                    "maxCloudCoverage":5
+                    "maxCloudCoverage":10,
+                    "mosaickingOrder": "leastCC"
                 }
             }
         ]
