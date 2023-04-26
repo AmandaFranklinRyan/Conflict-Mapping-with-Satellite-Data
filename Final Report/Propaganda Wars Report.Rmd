@@ -34,9 +34,13 @@ Amnesty International enlisted thousands of digital activists to analyse a serie
 
 This project aims to collect the dataset necessary to replicate Amnesty's Strike Tracker Project. However instead of using high resolution human labelled satellite images, medium resolution Sentinel-1 and Sentinel-2 images will be downloaded and in a future seminar paper (hopefully) used to investigate the efficacy of using machine learning methods to automatically detect building damage and to generate a destruction timeline using a simplified version of the methodology described in x. More specifically the project will:
 
-Identify and download suitable satellite images from the SentinelHub API, an R wrapper will also be written to simplify this process Collect and visualise data from UNOSAT illustrating the position of the coalition strikes (for the purposes of the future machine learning model this represents the ground truth) Download series of news articles from Guardian/New York Times API illustrating who different media outlets hold responsible for the civilian deaths.
+-   Identify and download suitable satellite images from the SentinelHub API, an R wrapper will also be written to simplify this process
 
-## Satellite Data
+-    Collect and visualise data from UNOSAT illustrating the position of the coalition strikes (for the purposes of the future machine learning model this represents the ground truth)
+
+-    Download series of news articles from Guardian/New York Times API illustrating who different media outlets hold responsible for the civilian deaths.
+
+## Medium Resolution Satellite Data (Sentinel-1 and Sentinel-2)
 
 ### Overview
 
@@ -47,6 +51,11 @@ Sentinel -1 was launched by the European Commission's Copernicus Project a year 
 Real colour images can be constructed by superimposing red, green and blue bands but often it is more revealing to use false colour. The optimal frequency depends on the exact nature of the task. Infrared is generally preferable for forestry mapping as soil and vegetation are difficult to differentiate in true colour imagery (as their spectral reflectances are almost identical in the visible range), however there is a difference of almost 30% in the mid-infrared band. [@customs]
 
 Frequencies can also be combined to accentuate features of interest, blending green (band 3), red (band 4) and infrared (band 8) creates a "false colour" image amplifying the infrared band. In 2020, Amnesty International used false colour imagery to identify vegetation burnt by gun propellant to pinpoint the firing position of Tigray strikes on Eritrea. [@https://citizenevidence.org/author/wallace-fan2023]Hundreds of [standard combinations](https://www.indexdatabase.de/db/i.php?offset=1) exist with the majority used to highlight vegetation, its water content and the chemical composition of the surrounding soil for use in crop monitoring.(include experimental imagery here from EO browser, Raqqa, destroyed buildings in blue+ resolution etc, talk about trade off with resolution, size of antenna, include formulae for some of the different combinations)
+
+```{r, echo=FALSE,out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
+knitr::include_graphics(c("..Visualisations//EO Browser Real Colour Rainforest Fires.png",
+                          "..Visualisations//EO Browser False Colour Rainforest Fires.png"))
+```
 
 To choose suitable bands for identifying building destruction, I followed a simplified version of the methodology described by Pfeiffle (2022) and Putri et al. (2022). [@sandhiniputri2022] [Conflict identification] Pfeiffle used machine learning methods to automatically identify building damage from airstrikes in Iraq and Northern Syria, choosing all Sentinel-2 images with a 10m resolution (red, green, blue and NIR). Assuming the damage profile of bombed buildings would be similar to those damaged in earthquakes, I also downloaded Sentinel-1 GRD imagery as Putri et al. concluded a fusion of Sentinel-1 and Sentinel-2 data yielded the highest accuracy in their random forest model identifying building damage from the 2018 Lombok earthquake. It would also be interesting to explore the possibility of using phase or polarisation parameters in the Sentinel-1 data to pinpoint destruction.
 
@@ -102,7 +111,7 @@ token <- oauth2.0_token(endpoint = endpoint,
 
 Using a combination of [these parameters](https://docs.sentinel-hub.com/api/latest/reference/#tag/catalog_core/operation/getCatalogLandingPage) coupled with [these examples](https://docs.sentinel-hub.com/api/latest/api/process/examples/) it was possible to structure the following request in JSON format. The upper portion of the JSON specifies the date range, bounding box, acceptable level of cloud cover and type of satellite footage required, while the lower section consists of evalscript to process the imagery.
 
-
+```{=html}
 <pre style="background-color:black;><span style="color: white;">{
     "input": {
         "bounds": {
@@ -136,7 +145,9 @@ Using a combination of [these parameters](https://docs.sentinel-hub.com/api/late
 },
     <span style="color: white;">"evalscript"</span>: "//VERSION=3\n\nfunction setup() {\n  return {\n    input: [\"B02\", \"B03\", \"B04\"],\n    output: { \n      bands: 3,\n      sampleType: \"AUTO\" // default value - scales the output values from [0,1] to [0,255].   \n     }\n  }\n}\n\nfunction evaluatePixel(sample) {\n  return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02]\n}"
 }
-</pre>text</span></strong>
+</pre>
+```
+text</span></strong>
 
 Ideally the POST request should be sent as a multipart form, which would allow the evalscript to be written in ordinary JSON. HoweverI was unable to do this correctly, so as a workaround escaped the entire JSON Evalscript section (using [this tool)](https://www.freeformatter.com/json-escape.html) and sent it as part of the same request. The image information was then extracted from the response object and the file saved as png.
 
