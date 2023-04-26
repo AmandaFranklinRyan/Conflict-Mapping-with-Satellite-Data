@@ -2,6 +2,8 @@ library(httr)
 library(brio)# for loading text file with no extension
 library(rio)
 library(png)
+library(lubridate)
+library(stringr)
 
 ### --- Oauth authorisation to access API
 
@@ -31,11 +33,30 @@ token <- oauth2.0_token(endpoint = endpoint,
 
 ### --- Build request
 
+start_date <- lubridate::ymd("2019-10-01")
+period_length_days <- 7
+number_periods <- 4
+end_date <- start_date+days(7)
+
+for (i in 0:number_periods-1)
+
 request <- read_file("R Scripts/POST body request") # loads request from JSON in text file
+
+current_date_start <- start_date+days(i*period_length_days)
+current_date_end <- start_date+days((i+1)*period_length_days)
+
+start_date_as_string <- paste(current_date_start$year, current_date_start$month, current_date_start$day, sep="-")
+end_date_as_string <- paste(current_date_end$year, current_date_end$month, current_date_end$day, sep="-")
+
+request_with_start <- str_replace(request, "InsertStartDate", start_date_as_string)
+request_with_end <- str_replace(request_with_start, "InsertEndDate", end_date_as_string)
+
 sentinel_endpoint <- "https://services.sentinel-hub.com/api/v1/process"
 
 # Specify which formats are accepted in request(JSON) and response(png)
-response <- httr::POST(sentinel_endpoint, body=request, add_headers(Accept = "image/png", `Content-Type`="application/json", Authorization = paste("Bearer", token$credentials[[1]], sep = " ")))
+response <- httr::POST(sentinel_endpoint, body=request_with_end, add_headers(Accept = "image/png", `Content-Type`="application/json", Authorization = paste("Bearer", token$credentials[[1]], sep = " ")))
+
+data_filename <- paste("SatelliteData"+start_date_as_string)
 
 ###--- Process response into png image
 # get the content as a png
@@ -45,5 +66,5 @@ rawPng = content(response)
 grid::grid.raster(rawPng)
 
 #Save to file
-png::writePNG(rawPng, target="Visualisations/cloudyzoomedoutraqqa.png")
+png::writePNG(rawPng, target="data_filename")
 

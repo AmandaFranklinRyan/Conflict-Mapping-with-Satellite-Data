@@ -16,8 +16,8 @@
                 "type": "sentinel-2-l1c",
                 "dataFilter": {
                     "timeRange": {
-                        "from": "2019-10-01T00:00:00Z",
-                        "to": "2019-12-31T00:00:00Z"
+                        "from": "InsertStartDateHereT00:00:00Z",
+                        "to": "InsertEndDateHereT00:00:00Z"
                     },
                     "maxCloudCoverage":5
                 }
