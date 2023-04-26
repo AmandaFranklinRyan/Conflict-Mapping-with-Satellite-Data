@@ -5,8 +5,9 @@ library(png)
 
 ### --- Oauth authorisation to access API
 
+
 # IDs and secrets
-client_id <- "dd6b1e7c-8a6a-4995-926f-5b190eb1dcc5"
+client_id <- readRDS("Secrets/oauth_client_id.rds")
 client_secret <- readRDS("Secrets/oauth_secret.rds")
 
 # Create the app
