@@ -34,13 +34,37 @@ This project aims to collect the dataset necessary to replicate Amnesty's Strike
 
 Identify and download suitable satellite images from the SentinelHub API, an R wrapper will also be written to simplify this process Collect and visualise data from UNOSAT illustrating the position of the coalition strikes (for the purposes of the future machine learning model this represents the ground truth) Download series of news articles from Guardian/New York Times API illustrating who different media outlets hold responsible for the civilian deaths.
 
-### Satellite Data
+## Satellite Data
+
+### Overview
 
 Launched by the European Space Agency in June 2015, primarily for agricultural monitoring and emergency management, Sentinel-2 collects land and ocean imagery to a maximum resolution of 10m every 5 days. [@sentinel]The imagery consists of 13 spectral bands ranging from visible (red, green, blue) to near infrared (NIR) and short wave infrared (SWIR), it also includes specific frequencies for identifying vegetation (bands 5-8a) and clouds (Band 10: Cirrus).[@customs]
 
-Sentinel -1 was launched by the European Commission\'s Copernicus Project a year earlier in April 2014, and collects Synthetic Aperture Radar (SAR) data every 10 days. [@sentinela]While Sentinel 2\'s optical sensors allow it to capture imagery from reflected sunlight, Sentinel-1 produces its own electromagnetic beam (with 8 bands between 0.3GHz and 40GHz) and records its reflection. The longer wavelength radar frequencies not only pass straight through clouds so can be used in any weather, but penetrate soil and sand [revealing hidden underground artefacts](https://earthobservatory.nasa.gov/features/SpaceArchaeology). Additionally, phase data can be extracted from the radar signal and used to calculate differences in surface topography with an accuracy of up to a few centimetres. [@earthsciencedatasystems2020] Combining these height difference calculations with machine learning techniques, one 2022 study identified buildings damaged by earthquakes.[@earthsciencedatasystems2020]
+Sentinel -1 was launched by the European Commission's Copernicus Project a year earlier in April 2014, and collects Synthetic Aperture Radar (SAR) data every 10 days. [@sentinela]While Sentinel 2's optical sensors allow it to capture imagery from reflected sunlight, Sentinel-1 produces its own electromagnetic beam (with 8 bands between 0.3GHz and 40GHz) and records its reflection. The longer wavelength radar frequencies not only pass straight through clouds so can be used in any weather, but penetrate soil and sand [revealing hidden underground artefacts](https://earthobservatory.nasa.gov/features/SpaceArchaeology). Additionally, phase data can be extracted from the radar signal and used to calculate differences in surface topography with an accuracy of up to a few centimetres. [@earthsciencedatasystems2020] Combining these height difference calculations with machine learning techniques, one 2022 study identified buildings damaged by earthquakes.[@earthsciencedatasystems2020]
 
-One 2022 study combined phase data with machine learning to identify buildings destroyed by earthquakes using
+Real colour images can be constructed by superimposing red, green and blue bands but often it is more revealing to use false colour. The optimal frequency depends on the exact nature of the task. Infrared is generally preferable for forestry mapping as soil and vegetation are difficult to differentiate in true colour imagery (as their spectral reflectances are almost identical in the visible range), however there is a difference of almost 30% in the mid-infrared band. [@customs]
+
+Frequencies can also be combined to accentuate features of interest, blending green (band 3), red (band 4) and infrared (band 8) creates a "false colour" image amplifying the infrared band. In 2020, Amnesty International used false colour imagery to identify vegetation burnt by gun propellant to pinpoint the firing position of Tigray strikes on Eritrea. [@https://citizenevidence.org/author/wallace-fan2023]Hundreds of [standard combinations](https://www.indexdatabase.de/db/i.php?offset=1) exist with the majority used to highlight vegetation, its water content and the chemical composition of the surrounding soil for use in crop monitoring.(include experimental imagery here from EO browser, Raqqa, destroyed buildings in blue+ resolution etc, talk about trade off with resolution, size of antenna, include formulae for some of the different combinations)
+
+To choose suitable bands for identifying building destruction, I followed a simplified version of the methodology described by Pfeiffle (2022) and Putri et al. (2022). [@sandhiniputri2022] [Conflict identification] Pfeiffle used machine learning methods to automatically identify building damage from airstrikes in Iraq and Northern Syria, choosing all Sentinel-2 images with a 10m resolution (red, green, blue and NIR). Assuming the damage profile of bombed buildings would be similar to those damaged in earthquakes, I also downloaded Sentinel-1 GRD imagery as Putri et al. concluded a fusion of Sentinel-1 and Sentinel-2 data yielded the highest accuracy in their random forest model identifying building damage from the 2018 Lombok earthquake. It would also be interesting to explore the possibility of using phase or polarisation parameters in the Sentinel-1 data to pinpoint destruction.
+
+### Data Download Options
+
+Sentinel Satellite data is available free online through the following portals:
+
+-   [EO Browser](https://apps.sentinel-hub.com/eo-browser/?zoom=10&lat=41.9&lng=12.5&themeId=DEFAULT-THEME&toTime=2023-04-26T12%3A08%3A08.207Z)
+-   [Copernicus Open Access Hub AP](https://scihub.copernicus.eu/)I
+-   [Sentinel Hub API](https://docs.sentinel-hub.com/api/latest/api/process/)
+
+The EO browser is an interface allowing registered users to easily select and download satellite imagery of regions of interest from an interactive map. Using simple drop down menus users can also select the relevant time range, level of maximum cloud coverage and type of image. Results are presented as a simple image list which not only offers the option of fusing single images into standard combinations including real colour, false colour and Normalised Difference Vegetation Index (NDVI), but also of creating custom combinations. Images can be saved, shared, pinned, downloaded and automatically woven into time lapse sequences. (example video of Raqqa.)
+
+Alternatively Sentinel-1, 2 and 3 imagery can be downloaded via the Copernicus Hub API. The R package [sen2r](https://cran.r-project.org/web/packages/sen2r/index.html) has been written to simplify the process of accessing Sentinel-2 data, allowing users to access imahergy not only via the libraries custom functions but also through a Shiny backed GUI interface. The RESTful Sentinel Hub Process API provides full access to data from all Sentinel satellites including polarisation and phase information. Users are offered the ability to both select products and perform bespoke image processing using the platform's Javascript based Evalscript. (Example of commented evalscript from code)
+
+Although it's possible to easily visualise, download and customise satellite imagery using EO Browser and sen2r, this project downloaded all imagery directly from the Sentinel Hub API. To use satellite data in a potential machine learning project I wanted to create an efficient data pipeline to collect and process large numbers of satellite photos without scrolling through multiple images manually via the browser. The sen2R package does offer this functionality but only for Sentinel-2 data, also it requires sci hub log-in which is only activated one week after registration (and would have made meeting this deadline impossible :))
+
+### Accessing the Sentinel Hub API
+
+\
 
 \
 
