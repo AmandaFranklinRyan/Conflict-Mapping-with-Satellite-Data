@@ -725,13 +725,60 @@ parameters</a> coupled with <a href="https://docs.sentinel-hub.com/api/latest/ap
 examples</a> it was possible to structure the following request in JSON
 format. The upper portion of the JSON specifies the date range, bounding
 box, acceptable level of cloud cover and type of satellite footage
-required, while the lower section is identical to the evalscript in
-figure x, which processes the imagery. Ideally the POST request should
-be sent as a multipart form, which would allow the evalscript to be
-written in ordinary JSON. However, I was unable to do this correctly so
-as a workaround escaped the entire JSON evalscript section (using <a href="https://www.freeformatter.com/json-escape.html">this tool)</a> and
+required, while the lower section consists of evalscript to process the
+imagery.</p>
+<pre style="background-color:black;&gt;&lt;span style=" color: white;">{
+    &quot;input&quot;: {
+        &quot;bounds&quot;: {
+            &quot;properties&quot;: {
+                <abbr title="Specify coordinate system">&quot;crs&quot;</abbr>: &quot;http://www.opengis.net/def/crs/OGC/1.3/CRS84&quot;
+            },
+            <abbr title="Bounding box: Coordinates illustrating region of interest">&quot;bbox&quot;</abbr>: [
+                38.93641,
+                39.05947,
+                35.92829,
+                35.97450
+            ]
+        },
+        &quot;data&quot;: [
+            {
+                &quot;type&quot;: &quot;sentinel-2-l1c&quot;,
+                &quot;dataFilter&quot;: {
+                    &quot;timeRange&quot;: {
+                        &quot;from&quot;: &quot;2019-10-01T00:00:00Z&quot;,
+                        &quot;to&quot;: &quot;2019-12-31T00:00:00Z&quot;
+                    },
+                    <abbr title="Maximum level of acceptable cloud coverage (0-100%)">&quot;maxCloudCoverage&quot;</abbr>:5
+                }
+            }
+        ]
+    },
+    <abbr title="Specify size of downloaded images">&quot;output&quot;:</abbr> {
+        &quot;width&quot;: 2000,
+        &quot;height&quot;: 2000
+    }
+},
+    <span style="color: white;">&quot;evalscript&quot;</span>: &quot;//VERSION=3\n\nfunction setup() {\n  return {\n    input: [\&quot;B02\&quot;, \&quot;B03\&quot;, \&quot;B04\&quot;],\n    output: { \n      bands: 3,\n      sampleType: \&quot;AUTO\&quot; // default value - scales the output values from [0,1] to [0,255].   \n     }\n  }\n}\n\nfunction evaluatePixel(sample) {\n  return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02]\n}&quot;
+}
+</pre>
+<p>text</span></strong></p>
+<p>Ideally the POST request should be sent as a multipart form, which
+would allow the evalscript to be written in ordinary JSON. HoweverI was
+unable to do this correctly, so as a workaround escaped the entire JSON
+Evalscript section (using <a href="https://www.freeformatter.com/json-escape.html">this tool)</a> and
 sent it as part of the same request. The image information was then
 extracted from the response object and the file saved as png.</p>
+<pre class="r fold-show"><code>### --- Build request
+
+request &lt;- read_file(&quot;R Scripts/POST body request&quot;) # loads request from JSON in text file
+sentinel_endpoint &lt;- &quot;https://services.sentinel-hub.com/api/v1/process&quot;
+
+# Specify which formats are accepted in request(JSON) and response(png)
+response &lt;- httr::POST(sentinel_endpoint, 
+                       body=request, 
+                       add_headers(Accept = &quot;image/png&quot;, 
+                                   `Content-Type`=&quot;application/json&quot;, 
+                                   Authorization = paste(&quot;Bearer&quot;, token$credentials[[1]], sep = &quot; &quot;)))</code></pre>
 <p><br />
 </p>
 <p><br />

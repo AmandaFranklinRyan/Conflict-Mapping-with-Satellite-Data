@@ -100,8 +100,59 @@ token <- oauth2.0_token(endpoint = endpoint,
                         client_credentials = T)
 ```
 
+Using a combination of [these parameters](https://docs.sentinel-hub.com/api/latest/reference/#tag/catalog_core/operation/getCatalogLandingPage) coupled with [these examples](https://docs.sentinel-hub.com/api/latest/api/process/examples/) it was possible to structure the following request in JSON format. The upper portion of the JSON specifies the date range, bounding box, acceptable level of cloud cover and type of satellite footage required, while the lower section consists of evalscript to process the imagery.
 
-Using a combination of [these parameters](https://docs.sentinel-hub.com/api/latest/reference/#tag/catalog_core/operation/getCatalogLandingPage) coupled with [these examples](https://docs.sentinel-hub.com/api/latest/api/process/examples/) it was possible to structure the following request in JSON format. The upper portion of the JSON specifies the date range, bounding box, acceptable level of cloud cover and type of satellite footage required, while the lower section is identical to the evalscript in figure x, which processes the imagery. Ideally the POST request should be sent as a multipart form, which would allow the evalscript to be written in ordinary JSON. However, I was unable to do this correctly so as a workaround escaped the entire JSON evalscript section (using [this tool)](https://www.freeformatter.com/json-escape.html) and sent it as part of the same request. The image information was then extracted from the response object and the file saved as png.
+
+<pre style="background-color:black;><span style="color: white;">{
+    "input": {
+        "bounds": {
+            "properties": {
+                <abbr title="Specify coordinate system">"crs"</abbr>: "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+            },
+            <abbr title="Bounding box: Coordinates illustrating region of interest">"bbox"</abbr>: [
+                38.93641,
+                39.05947,
+                35.92829,
+                35.97450
+            ]
+        },
+        "data": [
+            {
+                "type": "sentinel-2-l1c",
+                "dataFilter": {
+                    "timeRange": {
+                        "from": "2019-10-01T00:00:00Z",
+                        "to": "2019-12-31T00:00:00Z"
+                    },
+                    <abbr title="Maximum level of acceptable cloud coverage (0-100%)">"maxCloudCoverage"</abbr>:5
+                }
+            }
+        ]
+    },
+    <abbr title="Specify size of downloaded images">"output":</abbr> {
+        "width": 2000,
+        "height": 2000
+    }
+},
+    <span style="color: white;">"evalscript"</span>: "//VERSION=3\n\nfunction setup() {\n  return {\n    input: [\"B02\", \"B03\", \"B04\"],\n    output: { \n      bands: 3,\n      sampleType: \"AUTO\" // default value - scales the output values from [0,1] to [0,255].   \n     }\n  }\n}\n\nfunction evaluatePixel(sample) {\n  return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02]\n}"
+}
+</pre>text</span></strong>
+
+Ideally the POST request should be sent as a multipart form, which would allow the evalscript to be written in ordinary JSON. HoweverI was unable to do this correctly, so as a workaround escaped the entire JSON Evalscript section (using [this tool)](https://www.freeformatter.com/json-escape.html) and sent it as part of the same request. The image information was then extracted from the response object and the file saved as png.
+
+```{r,class.source = 'fold-show', eval=FALSE}
+### --- Build request
+
+request <- read_file("R Scripts/POST body request") # loads request from JSON in text file
+sentinel_endpoint <- "https://services.sentinel-hub.com/api/v1/process"
+
+# Specify which formats are accepted in request(JSON) and response(png)
+response <- httr::POST(sentinel_endpoint, 
+                       body=request, 
+                       add_headers(Accept = "image/png", 
+                                   `Content-Type`="application/json", 
+                                   Authorization = paste("Bearer", token$credentials[[1]], sep = " ")))
+```
 
 \
 
