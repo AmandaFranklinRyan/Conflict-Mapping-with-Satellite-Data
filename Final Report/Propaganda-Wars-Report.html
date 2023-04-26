@@ -209,6 +209,83 @@ window.buildTabsets = function(tocID) {
 };
 
 </script>
+<script>
+window.initializeCodeFolding = function(show) {
+
+  // handlers for show-all and hide all
+  $("#rmd-show-all-code").click(function() {
+    $('div.r-code-collapse').each(function() {
+      $(this).collapse('show');
+    });
+  });
+  $("#rmd-hide-all-code").click(function() {
+    $('div.r-code-collapse').each(function() {
+      $(this).collapse('hide');
+    });
+  });
+
+  // index for unique code element ids
+  var currentIndex = 1;
+
+  // select all R code blocks
+  var rCodeBlocks = $('pre.r, pre.python, pre.bash, pre.sql, pre.cpp, pre.stan, pre.julia, pre.foldable');
+  rCodeBlocks.each(function() {
+    // skip if the block has fold-none class
+    if ($(this).hasClass('fold-none')) return;
+
+    // create a collapsable div to wrap the code in
+    var div = $('<div class="collapse r-code-collapse"></div>');
+    var showThis = (show || $(this).hasClass('fold-show')) && !$(this).hasClass('fold-hide');
+    var id = 'rcode-643E0F36' + currentIndex++;
+    div.attr('id', id);
+    $(this).before(div);
+    $(this).detach().appendTo(div);
+
+    // add a show code button right above
+    var showCodeText = $('<span>' + (showThis ? 'Hide' : 'Code') + '</span>');
+    var showCodeButton = $('<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm code-folding-btn pull-right float-right"></button>');
+    showCodeButton.append(showCodeText);
+    showCodeButton
+        .attr('data-toggle', 'collapse')
+        .attr('data-bs-toggle', 'collapse') // BS5
+        .attr('data-target', '#' + id)
+        .attr('data-bs-target', '#' + id)   // BS5
+        .attr('aria-expanded', showThis)
+        .attr('aria-controls', id);
+
+    var buttonRow = $('<div class="row"></div>');
+    var buttonCol = $('<div class="col-md-12"></div>');
+
+    buttonCol.append(showCodeButton);
+    buttonRow.append(buttonCol);
+
+    div.before(buttonRow);
+
+    // show the div if necessary
+    if (showThis) div.collapse('show');
+
+    // update state of button on show/hide
+    //   * Change text
+    //   * add a class for intermediate states styling
+    div.on('hide.bs.collapse', function () {
+      showCodeText.text('Code');
+      showCodeButton.addClass('btn-collapsing');
+    });
+    div.on('hidden.bs.collapse', function () {
+      showCodeButton.removeClass('btn-collapsing');
+    });
+    div.on('show.bs.collapse', function () {
+      showCodeText.text('Hide');
+      showCodeButton.addClass('btn-expanding');
+    });
+    div.on('shown.bs.collapse', function () {
+      showCodeButton.removeClass('btn-expanding');
+    });
+
+  });
+
+}
+</script>
 <style type="text/css">.hljs-literal {
 color: #990073;
 }
@@ -354,6 +431,9 @@ display: none;
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
 
@@ -369,6 +449,14 @@ display: none;
 
 
 <div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
 
 
 
@@ -413,10 +501,10 @@ Twitter accounts geolocation data switched off, it’s game on for
 opportunists worldwide to create and share their own realities. Even
 with image metadata and reverse image search, it’s almost impossible to
 ascertain whether shared images are accurate, misrepresentative, staged
-or concocted by government backed bots. Dali2 will only make things
-worse, with the potential power to conjure up bespoke atrocities in
-every style from gritty World War II grayscale to heartrending full
-colour closeup.</p>
+or concocted by government backed bots. <a href="https://openai.com/product/dall-e-2">DALL.E2</a> will only make
+things worse, with the potential power to conjure up bespoke atrocities
+in every style from gritty World War II grayscale to heartrending full
+colour closeup at the click of a mouse.</p>
 <p>Yet in a world where fiction seems higher definition than reality,
 satellite imagery could offer a glimmer of hope. In March 2022
 Ukrainians reported the rape, murder and torture of hundreds of
@@ -436,7 +524,17 @@ and in isolation can rarely identify the true perpetrator, however it is
 already being used in conflict mapping. Depending on the location and
 nature of the violence, burning oil wells; abandoning agricultural land,
 (pictures here) construction of refugee camps and building damage have
-been used to identify and monitor armed conflict.</p>
+been used to identify and monitor armed conflict. Using methods to map
+meteor craters on the moon, a 2020 study used satellite imagery combined
+with machine learning to identify unexploded munitions from the Vietnam
+War embedded in overgrown bomb craters in rural Cambodia.<span class="citation">(Lin et al. 2020)</span> Detecting chemical and
+biological warfare with satellite imagery is less promising due to the
+low concentrations of the agents in the atmosphere, however vegetation
+changes could potentially be use as a proxy for contamination with
+radioactivity <span class="citation">(Sutlieff, Berthoud, and
+Stinchcombe 2021)</span> and journalists are already using satellite
+pictures to investigate North Korea’s chemical weapon capabilities.<span class="citation">(<span>“A Bird<span>’</span>s Eye View: Unearthing
+North Korea<span>’</span>s Chemical Weapons,”</span> n.d.)</span></p>
 </div>
 <div id="raqqa-the-perfect-perpetratorless-crime" class="section level3">
 <h3>Raqqa: The Perfect Perpetratorless Crime</h3>
@@ -474,6 +572,170 @@ coalition strikes (for the purposes of the future machine learning model
 this represents the ground truth) Download series of news articles from
 Guardian/New York Times API illustrating who different media outlets
 hold responsible for the civilian deaths.</p>
+</div>
+</div>
+<div id="satellite-data" class="section level2">
+<h2>Satellite Data</h2>
+<div id="overview" class="section level3">
+<h3>Overview</h3>
+<p>Launched by the European Space Agency in June 2015, primarily for
+agricultural monitoring and emergency management, Sentinel-2 collects
+land and ocean imagery to a maximum resolution of 10m every 5 days.
+<span class="citation">(<span>“Sentinel-2 - Missions - Sentinel
+Online,”</span> n.d.)</span>The imagery consists of 13 spectral bands
+ranging from visible (red, green, blue) to near infrared (NIR) and short
+wave infrared (SWIR), it also includes specific frequencies for
+identifying vegetation (bands 5-8a) and clouds (Band 10: Cirrus).<span class="citation">(<span>“Custom Scripts Tutorial,”</span>
+n.d.)</span></p>
+<p>Sentinel -1 was launched by the European Commission’s Copernicus
+Project a year earlier in April 2014, and collects Synthetic Aperture
+Radar (SAR) data every 10 days. <span class="citation">(<span>“Sentinel-1 - Missions - Sentinel
+Online,”</span> n.d.)</span>While Sentinel 2’s optical sensors allow it
+to capture imagery from reflected sunlight, Sentinel-1 produces its own
+electromagnetic beam (with 8 bands between 0.3GHz and 40GHz) and records
+its reflection. The longer wavelength radar frequencies not only pass
+straight through clouds so can be used in any weather, but penetrate
+soil and sand <a href="https://earthobservatory.nasa.gov/features/SpaceArchaeology">revealing
+hidden underground artefacts</a>. Additionally, phase data can be
+extracted from the radar signal and used to calculate differences in
+surface topography with an accuracy of up to a few centimetres. <span class="citation">(Earth Science Data Systems 2020)</span> Combining
+these height difference calculations with machine learning techniques,
+one 2022 study identified buildings damaged by earthquakes.<span class="citation">(Earth Science Data Systems 2020)</span></p>
+<p>Real colour images can be constructed by superimposing red, green and
+blue bands but often it is more revealing to use false colour. The
+optimal frequency depends on the exact nature of the task. Infrared is
+generally preferable for forestry mapping as soil and vegetation are
+difficult to differentiate in true colour imagery (as their spectral
+reflectances are almost identical in the visible range), however there
+is a difference of almost 30% in the mid-infrared band. <span class="citation">(<span>“Custom Scripts Tutorial,”</span>
+n.d.)</span></p>
+<p>Frequencies can also be combined to accentuate features of interest,
+blending green (band 3), red (band 4) and infrared (band 8) creates a
+“false colour” image amplifying the infrared band. In 2020, Amnesty
+International used false colour imagery to identify vegetation burnt by
+gun propellant to pinpoint the firing position of Tigray strikes on
+Eritrea. <span class="citation">(https://citizenevidence.org/author/wallace-fan
+2023)</span>Hundreds of <a href="https://www.indexdatabase.de/db/i.php?offset=1">standard
+combinations</a> exist with the majority used to highlight vegetation,
+its water content and the chemical composition of the surrounding soil
+for use in crop monitoring.(include experimental imagery here from EO
+browser, Raqqa, destroyed buildings in blue+ resolution etc, talk about
+trade off with resolution, size of antenna, include formulae for some of
+the different combinations)</p>
+<p>To choose suitable bands for identifying building destruction, I
+followed a simplified version of the methodology described by Pfeiffle
+(2022) and Putri et al. (2022). <span class="citation">(Sandhini Putri,
+Widyatmanti, and Umarhadi 2022)</span> [Conflict identification]
+Pfeiffle used machine learning methods to automatically identify
+building damage from airstrikes in Iraq and Northern Syria, choosing all
+Sentinel-2 images with a 10m resolution (red, green, blue and NIR).
+Assuming the damage profile of bombed buildings would be similar to
+those damaged in earthquakes, I also downloaded Sentinel-1 GRD imagery
+as Putri et al. concluded a fusion of Sentinel-1 and Sentinel-2 data
+yielded the highest accuracy in their random forest model identifying
+building damage from the 2018 Lombok earthquake. It would also be
+interesting to explore the possibility of using phase or polarisation
+parameters in the Sentinel-1 data to pinpoint destruction.</p>
+</div>
+<div id="data-download-options" class="section level3">
+<h3>Data Download Options</h3>
+<p>Sentinel Satellite data is available free online through the
+following portals:</p>
+<ul>
+<li><a href="https://apps.sentinel-hub.com/eo-browser/?zoom=10&amp;lat=41.9&amp;lng=12.5&amp;themeId=DEFAULT-THEME&amp;toTime=2023-04-26T12%3A08%3A08.207Z">EO
+Browser</a></li>
+<li><a href="https://scihub.copernicus.eu/">Copernicus Open Access Hub
+AP</a>I</li>
+<li><a href="https://docs.sentinel-hub.com/api/latest/api/process/">Sentinel
+Hub API</a></li>
+</ul>
+<p>The EO browser is an interface allowing registered users to easily
+select and download satellite imagery of regions of interest from an
+interactive map. Using simple drop down menus users can also select the
+relevant time range, level of maximum cloud coverage and type of image.
+Results are presented as a simple image list which not only offers the
+option of fusing single images into standard combinations including real
+colour, false colour and Normalised Difference Vegetation Index (NDVI),
+but also of creating custom combinations. Images can be saved, shared,
+pinned, downloaded and automatically woven into time lapse sequences.
+(example video of Raqqa.)</p>
+<p>Alternatively Sentinel-1, 2 and 3 imagery can be downloaded via the
+Copernicus Hub API. The R package <a href="https://cran.r-project.org/web/packages/sen2r/index.html">sen2r</a>
+has been written to simplify the process of accessing Sentinel-2 data,
+allowing users to access imahergy not only via the libraries custom
+functions but also through a Shiny backed GUI interface. The RESTful
+Sentinel Hub Process API provides full access to data from all Sentinel
+satellites including polarisation and phase information. Users are
+offered the ability to both select products and perform bespoke image
+processing using the platform’s Javascript based Evalscript. (Example of
+commented evalscript from code)</p>
+<p>Although it’s possible to easily visualise, download and customise
+satellite imagery using EO Browser and sen2r, this project downloaded
+all imagery directly from the Sentinel Hub API. To use satellite data in
+a potential machine learning project I wanted to create an efficient
+data pipeline to collect and process large numbers of satellite photos
+without scrolling through multiple images manually via the browser. The
+sen2R package does offer this functionality but only for Sentinel-2
+data, also it requires sci hub log-in which is only activated one week
+after registration (and would have made meeting this deadline impossible
+:))</p>
+</div>
+<div id="accessing-the-sentinel-hub-api" class="section level3">
+<h3>Accessing the Sentinel Hub API</h3>
+<p>Configuring the OAUTH 2.0 authorisation in R was a challenging task,
+first it was necessary to register for a client ID and secret then
+create an oauth app to generate a token (which is valid for 1 hour) The
+Sentinal API requires a POST request specifying the endpoint and request
+body. The<code>{r, eval=FALSE} add_headers</code> argument must also be
+set, requiring: png images are returned
+<code>{r, eval=FALSE} Accept</code>;the body request will be sent in
+JSON <code>{r, eval=FALSE} Content-Type</code> and specifying the
+necessary authorisation parameters.</p>
+<pre class="r"><code>library(httr)
+library(brio)# for loading text file with no extension
+library(rio)
+library(png)
+
+### --- Oauth Authorisation to access API
+
+# IDs and secrets
+client_id &lt;- readRDS(&quot;Secrets/oauth_client_id.rds&quot;)
+client_secret &lt;- readRDS(&quot;Secrets/oauth_secret.rds&quot;)
+
+# Create the app
+app &lt;- oauth_app(appname = &quot;SatelliteImageryAnalysis&quot;,
+                 key = client_id,
+                 secret = client_secret)
+
+# Create the oauth endpoint
+endpoint &lt;- oauth_endpoint(
+  request = NULL,
+  authorize = NULL,
+  access = &quot;token&quot;,
+  base_url = &quot;https://services.sentinel-hub.com/oauth&quot;)
+
+# Cache the token to prevent API being called multiple times (token lasts 1 hour)
+options(httr_oauth_cache=T) # prevents pop-up asking to cache token
+token &lt;- oauth2.0_token(endpoint = endpoint,
+                        app = app,
+                        use_basic_auth = T,
+                        client_credentials = T)</code></pre>
+<p>Using a combination of <a href="https://docs.sentinel-hub.com/api/latest/reference/#tag/catalog_core/operation/getCatalogLandingPage">these
+parameters</a> coupled with <a href="https://docs.sentinel-hub.com/api/latest/api/process/examples/">these
+examples</a> it was possible to structure the following request in JSON
+format. The upper portion of the JSON specifies the date range, bounding
+box, acceptable level of cloud cover and type of satellite footage
+required, while the lower section is identical to the evalscript in
+figure x, which processes the imagery. Ideally the POST request should
+be sent as a multipart form, which would allow the evalscript to be
+written in ordinary JSON. However, I was unable to do this correctly so
+as a workaround escaped the entire JSON evalscript section (using <a href="https://www.freeformatter.com/json-escape.html">this tool)</a> and
+sent it as part of the same request. The image information was then
+extracted from the response object and the file saved as png.</p>
+<p><br />
+</p>
+<p><br />
+</p>
 <pre class="r"><code>summary(cars)</code></pre>
 <pre><code>##      speed           dist       
 ##  Min.   : 4.0   Min.   :  2.00  
@@ -492,6 +754,10 @@ hold responsible for the civilian deaths.</p>
 code chunk to prevent printing of the R code that generated the
 plot.</p>
 <div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-abirds" class="csl-entry">
+<span>“A Bird<span>’</span>s Eye View: Unearthing North
+Korea<span>’</span>s Chemical Weapons.”</span> n.d. <a href="https://www.unearthlabs.com/blogs/unearthing-north-koreas-chemical-weapons">https://www.unearthlabs.com/blogs/unearthing-north-koreas-chemical-weapons</a>.
+</div>
 <div id="ref-abuhamad1994" class="csl-entry">
 Abuhamad, Aziz. 1994. <span>“The Kuwait Incubator Hoax.”</span>
 <em>Washington Post</em>, February. <a href="https://www.washingtonpost.com/archive/opinions/1994/02/26/the-kuwaiti-incubator-hoax/35b1e882-f796-4acb-a106-9280a7dda521/">https://www.washingtonpost.com/archive/opinions/1994/02/26/the-kuwaiti-incubator-hoax/35b1e882-f796-4acb-a106-9280a7dda521/</a>.
@@ -505,6 +771,13 @@ U.S. Tally, Report Finds.”</span> <a href="https://theintercept.com/2019/04/25
 <span>“Bucha Killings: Satellite Image of Bodies Site Contradicts
 Russian Claims.”</span> 2022. <em>BBC News</em>, April. <a href="https://www.bbc.com/news/60981238">https://www.bbc.com/news/60981238</a>.
 </div>
+<div id="ref-customs" class="csl-entry">
+<span>“Custom Scripts Tutorial.”</span> n.d. <a href="https://www.sentinel-hub.com/explore/education/custom-scripts-tutorial/">https://www.sentinel-hub.com/explore/education/custom-scripts-tutorial/</a>.
+</div>
+<div id="ref-earthsciencedatasystems2020" class="csl-entry">
+Earth Science Data Systems, NASA. 2020. <span>“What Is Synthetic
+Aperture Radar?”</span> <a href="https://www.earthdata.nasa.gov/learn/backgrounders/what-is-sar">https://www.earthdata.nasa.gov/learn/backgrounders/what-is-sar</a>.
+</div>
 <div id="ref-guyjohn592010" class="csl-entry">
 guyjohn59. 2010. <span>“Nayirah Kuwaiti Girl Testimony,”</span> June. <a href="https://www.youtube.com/watch?v=LmfVs3WaE9Y">https://www.youtube.com/watch?v=LmfVs3WaE9Y</a>.
 </div>
@@ -512,13 +785,42 @@ guyjohn59. 2010. <span>“Nayirah Kuwaiti Girl Testimony,”</span> June. <a hre
 <span>“How False Testimony and a Massive U.S. Propaganda Machine
 Bolstered George H.W. Bush<span>’</span>s War on Iraq.”</span> n.d. <a href="https://www.democracynow.org/2018/12/5/how_false_testimony_and_a_massive">https://www.democracynow.org/2018/12/5/how_false_testimony_and_a_massive</a>.
 </div>
+<div id="ref-https://citizenevidence.org/author/wallace-fan2023" class="csl-entry">
+https://citizenevidence.org/author/wallace-fan. 2023. <span>“Summit
+Series: A Beginner<span>’</span>s Guide to Sentinel Hub.”</span> <a href="https://citizenevidence.org/2023/03/21/summit-series-a-beginners-guide-to-sentinel-hub/">https://citizenevidence.org/2023/03/21/summit-series-a-beginners-guide-to-sentinel-hub/</a>.
+</div>
 <div id="ref-isconfl2019" class="csl-entry">
 <span>“IS Conflict: Coalition Strikes on Raqqa ’Killed 1,600
 Civilians’.”</span> 2019. <em>BBC News</em>, April. <a href="https://www.bbc.com/news/world-middle-east-48044115">https://www.bbc.com/news/world-middle-east-48044115</a>.
 </div>
+<div id="ref-lin2020" class="csl-entry">
+Lin, Erin, Rongjun Qin, Jared Edgerton, and Deren Kong. 2020.
+<span>“Crater Detection from Commercial Satellite Imagery to Estimate
+Unexploded Ordnance in Cambodian Agricultural Land.”</span> <em>PLOS
+ONE</em> 15 (3): e0229826. <a href="https://doi.org/10.1371/journal.pone.0229826">https://doi.org/10.1371/journal.pone.0229826</a>.
+</div>
 <div id="ref-mirovalev" class="csl-entry">
 Mirovalev, Mansur. n.d. <span>“Bucha Killings: <span>‘</span>The World
 Cannot Be Tricked Anymore<span>’</span>.”</span> <a href="https://www.aljazeera.com/news/2022/4/4/will-the-bucha-massacre-wake-up-the-world">https://www.aljazeera.com/news/2022/4/4/will-the-bucha-massacre-wake-up-the-world</a>.
+</div>
+<div id="ref-sandhiniputri2022" class="csl-entry">
+Sandhini Putri, Ade Febri, Wirastuti Widyatmanti, and Deha Agus
+Umarhadi. 2022. <span>“Sentinel-1 and Sentinel-2 Data Fusion to
+Distinguish Building Damage Level of the 2018 Lombok Earthquake.”</span>
+<em>Remote Sensing Applications: Society and Environment</em> 26
+(April): 100724. <a href="https://doi.org/10.1016/j.rsase.2022.100724">https://doi.org/10.1016/j.rsase.2022.100724</a>.
+</div>
+<div id="ref-sentinela" class="csl-entry">
+<span>“Sentinel-1 - Missions - Sentinel Online.”</span> n.d. <a href="https://copernicus.eu/missions/sentinel-1">https://copernicus.eu/missions/sentinel-1</a>.
+</div>
+<div id="ref-sentinel" class="csl-entry">
+<span>“Sentinel-2 - Missions - Sentinel Online.”</span> n.d. <a href="https://copernicus.eu/missions/sentinel-2">https://copernicus.eu/missions/sentinel-2</a>.
+</div>
+<div id="ref-sutlieff2021" class="csl-entry">
+Sutlieff, Gary, Lucy Berthoud, and Mark Stinchcombe. 2021. <span>“Using
+Satellite Data for CBRN (Chemical, Biological, Radiological, and
+Nuclear) Threat Detection, Monitoring, and Modelling.”</span>
+<em>Surveys in Geophysics</em> 42 (3): 727–55. <a href="https://doi.org/10.1007/s10712-021-09637-5">https://doi.org/10.1007/s10712-021-09637-5</a>.
 </div>
 <div id="ref-tanksan" class="csl-entry">
 <span>“Tanks And Twitter: Sudan Generals<span>’</span> Multi-Pronged
@@ -560,6 +862,11 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

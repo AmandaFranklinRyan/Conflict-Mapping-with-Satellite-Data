@@ -2,7 +2,9 @@
 title: "Propaganda Wars"
 author: "Amanda Franklin-Ryan"
 date: "2023-04-25"
-output: html_document
+output:
+  html_document:
+    code_folding: hide
 bibliography: references.bib
 ---
 
@@ -63,6 +65,43 @@ Alternatively Sentinel-1, 2 and 3 imagery can be downloaded via the Copernicus H
 Although it's possible to easily visualise, download and customise satellite imagery using EO Browser and sen2r, this project downloaded all imagery directly from the Sentinel Hub API. To use satellite data in a potential machine learning project I wanted to create an efficient data pipeline to collect and process large numbers of satellite photos without scrolling through multiple images manually via the browser. The sen2R package does offer this functionality but only for Sentinel-2 data, also it requires sci hub log-in which is only activated one week after registration (and would have made meeting this deadline impossible :))
 
 ### Accessing the Sentinel Hub API
+
+Configuring the OAUTH 2.0 authorisation in R was a challenging task, first it was necessary to register for a client ID and secret then create an oauth app to generate a token (which is valid for 1 hour) The Sentinal API requires a POST request specifying the endpoint and request body. The`{r, eval=FALSE} add_headers` argument must also be set, requiring: png images are returned `{r, eval=FALSE} Accept`;the body request will be sent in JSON `{r, eval=FALSE} Content-Type` and specifying the necessary authorisation parameters.
+
+```{r, eval=FALSE}
+library(httr)
+library(brio)# for loading text file with no extension
+library(rio)
+library(png)
+
+### --- Oauth Authorisation to access API
+
+# IDs and secrets
+client_id <- readRDS("Secrets/oauth_client_id.rds")
+client_secret <- readRDS("Secrets/oauth_secret.rds")
+
+# Create the app
+app <- oauth_app(appname = "SatelliteImageryAnalysis",
+                 key = client_id,
+                 secret = client_secret)
+
+# Create the oauth endpoint
+endpoint <- oauth_endpoint(
+  request = NULL,
+  authorize = NULL,
+  access = "token",
+  base_url = "https://services.sentinel-hub.com/oauth")
+
+# Cache the token to prevent API being called multiple times (token lasts 1 hour)
+options(httr_oauth_cache=T) # prevents pop-up asking to cache token
+token <- oauth2.0_token(endpoint = endpoint,
+                        app = app,
+                        use_basic_auth = T,
+                        client_credentials = T)
+```
+
+
+Using a combination of [these parameters](https://docs.sentinel-hub.com/api/latest/reference/#tag/catalog_core/operation/getCatalogLandingPage) coupled with [these examples](https://docs.sentinel-hub.com/api/latest/api/process/examples/) it was possible to structure the following request in JSON format. The upper portion of the JSON specifies the date range, bounding box, acceptable level of cloud cover and type of satellite footage required, while the lower section is identical to the evalscript in figure x, which processes the imagery. Ideally the POST request should be sent as a multipart form, which would allow the evalscript to be written in ordinary JSON. However, I was unable to do this correctly so as a workaround escaped the entire JSON evalscript section (using [this tool)](https://www.freeformatter.com/json-escape.html) and sent it as part of the same request. The image information was then extracted from the response object and the file saved as png.
 
 \
 
