@@ -6,7 +6,7 @@ library(lubridate)
 library(stringr)
 
 download_satellite_data <- function(start_date, period_length_days,number_periods, min_lat,
-                                    max_lat,min_long,max_long, satellite_type, cloud_cover){
+                                    max_lat,min_long,max_long, satellite_type, cloud_cover, pixels_dimensions_height){
 
 ### --- Oauth authorisation to access API
 
@@ -72,16 +72,35 @@ for (i in 0:number_periods-1){
   request_with_region3 <- str_replace_all(request_with_region2, "InsertMinLat", as.character(min_lat))
   request_with_region4 <- str_replace_all(request_with_region3, "InsertMaxLat", as.character(max_lat))
   
-  ### Calculate optimum image size
+  ### Calculate optimum image size----
   # API demands user specifies the dimensions of the output image
   # To ensure it is not stretched, dimensions have been calculated based on user specifying desired number of pixels in horizontal direction
   
-
+  # Calculate longitude and latitude differences from user input
+  latitude_diff <- max_lat-min_lat
+  longitude_diff <- max_long-min_long
+  
+  #Convert difference in latitude from degrees to km using standard conversion formula
+  lat_metres <- abs(111.32*latitude_diff)
+  long_metres <-  abs(longitude_diff*40075*cos(max_lat)/360)
+  
+  # Calculate ratio of height:length of the selected satellite image
+  normalised_lat_km <- lat_metres/long_metres
+  normalised_lat_km 
+  
+  # Calculate width of output image based on user defined pixel height
+  pixels_dimensions_width= round(normalised_lat_km*pixels_dimensions_height)
+  
+  #Create image resolution parameter of JSON body
+  request_with_resolution_height <- str_replace(request_with_region4, "InsertPixelHeight", as.character(pixels_dimensions_height))
+  request_with_resolution_width <- str_replace(request_with_resolution_height, "InsertPixelWidth", as.character(pixels_dimensions_width))
+  print(request_with_resolution_width)
+  
   # Specify Sentinel endpoint
   sentinel_endpoint <- "https://services.sentinel-hub.com/api/v1/process"
   
   # Specify which formats are accepted in request(JSON) and response(png)
-  response <- httr::POST(sentinel_endpoint, body=request_with_region4, add_headers(Accept = "image/png", `Content-Type`="application/json", Authorization = paste("Bearer", token$credentials[[1]], sep = " ")))
+  response <- httr::POST(sentinel_endpoint, body=request_with_resolution_width, add_headers(Accept = "image/png", `Content-Type`="application/json", Authorization = paste("Bearer", token$credentials[[1]], sep = " ")))
   
   data_filename <- paste("SatelliteData",start_date_as_string,".png",sep="")
   
@@ -89,6 +108,7 @@ for (i in 0:number_periods-1){
   
   #Get the content as a png
   rawPng = content(response)
+  print(rawPng)
   png::writePNG(rawPng , target=data_filename)
   
   ### Annotate png with Date---
@@ -107,5 +127,6 @@ for (i in 0:number_periods-1){
 }
 }
 
-download_satellite_data("2017-05-01", 7, 3, 35.92829,35.9745,38.93641,39.05947,"sentinel-2-l2a",10)
+## Example function call
+download_satellite_data("2017-05-01", 7, 3, 35.92829,35.9745,38.93641,39.05947,"sentinel-2-l2a",10,500)
 

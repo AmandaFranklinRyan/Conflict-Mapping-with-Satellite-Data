@@ -541,7 +541,7 @@ North Korea<span>’</span>s Chemical Weapons,”</span> n.d.)</span></p>
 </div>
 <div id="raqqa-the-perfect-perpetratorless-crime" class="section level3">
 <h3>Raqqa: The Perfect Perpetratorless Crime</h3>
-<p>Launched in 2019, Amnesty International’s <a href="https://decoders.amnesty.org/projects/strike-tracker#decode-results">Strike
+<p>Created in 2019, Amnesty International’s <a href="https://decoders.amnesty.org/projects/strike-tracker#decode-results">Strike
 Tracker</a> used satellite imagery coupled with crowd sourced image
 labelling to create an accurate timeline for the 2017 US led Coalition
 bombing in the Syrian city of Raqqa. Attempting to destroy Islamic
@@ -670,8 +670,8 @@ Results are presented as a simple image list which not only offers the
 option of fusing single images into standard combinations including real
 colour, false colour and Normalised Difference Vegetation Index (NDVI),
 but also of creating custom combinations. Images can be saved, shared,
-pinned, downloaded and automatically woven into time lapse sequences.
-(example video of Raqqa.)</p>
+pinned, downloaded and automatically woven into time lapse
+sequences.</p>
 <p>Alternatively Sentinel-1, 2 and 3 imagery can be downloaded via the
 Copernicus Hub API. The R package <a href="https://cran.r-project.org/web/packages/sen2r/index.html">sen2r</a>
 has been written to simplify the process of accessing Sentinel-2 data,
@@ -736,52 +736,49 @@ token &lt;- oauth2.0_token(endpoint = endpoint,
 <p>Using a combination of <a href="https://docs.sentinel-hub.com/api/latest/reference/#tag/catalog_core/operation/getCatalogLandingPage">these
 parameters</a> coupled with <a href="https://docs.sentinel-hub.com/api/latest/api/process/examples/">these
 examples</a> it was possible to structure the following request in JSON
-format. The upper portion of the JSON specifies the date range, bounding
-box, acceptable level of cloud cover and type of satellite footage
-required, while the lower section consists of evalscript to process the
-imagery.</p>
-<pre style="background-color:black;&gt;&lt;span style=" color: white;">{
+format. The upper portion of the JSON specifies the date range, region
+of interest (bbox); acceptable level of cloud cover
+(maxCloudCoverage);type of satellite footage required (type), resolution
+(width, height) and coordinate system (crs) while the lower section
+consists of evalscript to process the imagery.</p>
+<pre class="python"><code>  request={
     &quot;input&quot;: {
         &quot;bounds&quot;: {
             &quot;properties&quot;: {
-                <abbr title="Specify coordinate system">&quot;crs&quot;</abbr>: &quot;http://www.opengis.net/def/crs/OGC/1.3/CRS84&quot;
+                &quot;crs&quot;: &quot;http://www.opengis.net/def/crs/OGC/1.3/CRS84&quot;
             },
-            <abbr title="Bounding box: Coordinates illustrating region of interest">&quot;bbox&quot;</abbr>: [
-                38.93641,
-                39.05947,
-                35.92829,
-                35.97450
+            &quot;bbox&quot;: [
+                13.822174072265625,
+                45.85080395917834,
+                14.55963134765625,
+                46.29191774991382
             ]
         },
         &quot;data&quot;: [
             {
-                &quot;type&quot;: &quot;sentinel-2-l1c&quot;,
+                &quot;type&quot;: &quot;sentinel-2-l2a&quot;,
                 &quot;dataFilter&quot;: {
                     &quot;timeRange&quot;: {
-                        &quot;from&quot;: &quot;2019-10-01T00:00:00Z&quot;,
-                        &quot;to&quot;: &quot;2019-12-31T00:00:00Z&quot;
-                    },
-                    <abbr title="Maximum level of acceptable cloud coverage (0-100%)">&quot;maxCloudCoverage&quot;</abbr>:5
+                        &quot;from&quot;: &quot;2018-10-01T00:00:00Z&quot;,
+                        &quot;to&quot;: &quot;2018-12-31T00:00:00Z&quot;
+                    }
                 }
             }
         ]
     },
-    <abbr title="Specify size of downloaded images">&quot;output&quot;:</abbr> {
-        &quot;width&quot;: 2000,
-        &quot;height&quot;: 2000
+    &quot;output&quot;: {
+        &quot;width&quot;: 512,
+        &quot;height&quot;: 512
     }
-},
-    <span style="color: white;">&quot;evalscript&quot;</span>: &quot;//VERSION=3\n\nfunction setup() {\n  return {\n    input: [\&quot;B02\&quot;, \&quot;B03\&quot;, \&quot;B04\&quot;],\n    output: { \n      bands: 3,\n      sampleType: \&quot;AUTO\&quot; // default value - scales the output values from [0,1] to [0,255].   \n     }\n  }\n}\n\nfunction evaluatePixel(sample) {\n  return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02]\n}&quot;
-}
-</pre>
-<p>text</span></strong></p>
+}</code></pre>
+<p><code>{=html,class.source = &#39;fold-hide&#39;} &lt;pre style=&quot;background-color:black;&gt;&lt;span style=&quot;color: white;&quot;&gt;{     &quot;input&quot;: {         &quot;bounds&quot;: {             &quot;properties&quot;: {                 &lt;abbr title=&quot;Specify coordinate system&quot;&gt;&quot;crs&quot;&lt;/abbr&gt;: &quot;http://www.opengis.net/def/crs/OGC/1.3/CRS84&quot;             },             &lt;abbr title=&quot;Bounding box: Coordinates illustrating region of interest&quot;&gt;&quot;bbox&quot;&lt;/abbr&gt;: [                 38.93641,                 39.05947,                 35.92829,                 35.97450             ]         },         &quot;data&quot;: [             {                 &quot;type&quot;: &quot;sentinel-2-l1c&quot;,                 &quot;dataFilter&quot;: {                     &quot;timeRange&quot;: {                         &quot;from&quot;: &quot;2019-10-01T00:00:00Z&quot;,                         &quot;to&quot;: &quot;2019-12-31T00:00:00Z&quot;                     },                     &lt;abbr title=&quot;Maximum level of acceptable cloud coverage (0-100%)&quot;&gt;&quot;maxCloudCoverage&quot;&lt;/abbr&gt;:5                 }             }         ]     },     &lt;abbr title=&quot;Specify size of downloaded images&quot;&gt;&quot;output&quot;:&lt;/abbr&gt; {         &quot;width&quot;: 2000,         &quot;height&quot;: 2000     } },     &lt;span style=&quot;color: white;&quot;&gt;&quot;evalscript&quot;&lt;/span&gt;: &quot;//VERSION=3\n\nfunction setup() {\n  return {\n    input: [\&quot;B02\&quot;, \&quot;B03\&quot;, \&quot;B04\&quot;],\n    output: { \n      bands: 3,\n      sampleType: \&quot;AUTO\&quot; // default value - scales the output values from [0,1] to [0,255].   \n     }\n  }\n}\n\nfunction evaluatePixel(sample) {\n  return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02]\n}&quot; } &lt;/pre&gt;</code></p>
 <p>Ideally the POST request should be sent as a multipart form, which
 would allow the evalscript to be written in ordinary JSON. HoweverI was
 unable to do this correctly, so as a workaround escaped the entire JSON
 Evalscript section (using <a href="https://www.freeformatter.com/json-escape.html">this tool)</a> and
 sent it as part of the same request. The image information was then
 extracted from the response object and the file saved as png.</p>
-<pre class="r fold-show"><code>### --- Build request
+<pre class="r"><code>### --- Build request
 
 request &lt;- read_file(&quot;R Scripts/POST body request&quot;) # loads request from JSON in text file
 sentinel_endpoint &lt;- &quot;https://services.sentinel-hub.com/api/v1/process&quot;
@@ -792,6 +789,10 @@ response &lt;- httr::POST(sentinel_endpoint,
                        add_headers(Accept = &quot;image/png&quot;, 
                                    `Content-Type`=&quot;application/json&quot;, 
                                    Authorization = paste(&quot;Bearer&quot;, token$credentials[[1]], sep = &quot; &quot;)))</code></pre>
+</div>
+<div id="function-to-automatically-download-sentinel-2-data" class="section level3">
+<h3>Function to automatically download Sentinel-2 Data</h3>
+<p>To simplify the download process</p>
 <p><br />
 </p>
 <p><br />

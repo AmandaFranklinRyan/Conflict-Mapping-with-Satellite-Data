@@ -67,7 +67,7 @@ Sentinel Satellite data is available free online through the following portals:
 -   [Copernicus Open Access Hub AP](https://scihub.copernicus.eu/)I
 -   [Sentinel Hub API](https://docs.sentinel-hub.com/api/latest/api/process/)
 
-The EO browser is an interface allowing registered users to easily select and download satellite imagery of regions of interest from an interactive map. Using simple drop down menus users can also select the relevant time range, level of maximum cloud coverage and type of image. Results are presented as a simple image list which not only offers the option of fusing single images into standard combinations including real colour, false colour and Normalised Difference Vegetation Index (NDVI), but also of creating custom combinations. Images can be saved, shared, pinned, downloaded and automatically woven into time lapse sequences. (example video of Raqqa.)
+The EO browser is an interface allowing registered users to easily select and download satellite imagery of regions of interest from an interactive map. Using simple drop down menus users can also select the relevant time range, level of maximum cloud coverage and type of image. Results are presented as a simple image list which not only offers the option of fusing single images into standard combinations including real colour, false colour and Normalised Difference Vegetation Index (NDVI), but also of creating custom combinations. Images can be saved, shared, pinned, downloaded and automatically woven into time lapse sequences.
 
 Alternatively Sentinel-1, 2 and 3 imagery can be downloaded via the Copernicus Hub API. The R package [sen2r](https://cran.r-project.org/web/packages/sen2r/index.html) has been written to simplify the process of accessing Sentinel-2 data, allowing users to access imahergy not only via the libraries custom functions but also through a Shiny backed GUI interface. The RESTful Sentinel Hub Process API provides full access to data from all Sentinel satellites including polarisation and phase information. Users are offered the ability to both select products and perform bespoke image processing using the platform's Javascript based Evalscript. (Example of commented evalscript from code)
 
@@ -109,49 +109,46 @@ token <- oauth2.0_token(endpoint = endpoint,
                         client_credentials = T)
 ```
 
-Using a combination of [these parameters](https://docs.sentinel-hub.com/api/latest/reference/#tag/catalog_core/operation/getCatalogLandingPage) coupled with [these examples](https://docs.sentinel-hub.com/api/latest/api/process/examples/) it was possible to structure the following request in JSON format. The upper portion of the JSON specifies the date range, bounding box, acceptable level of cloud cover and type of satellite footage required, while the lower section consists of evalscript to process the imagery.
+Using a combination of [these parameters](https://docs.sentinel-hub.com/api/latest/reference/#tag/catalog_core/operation/getCatalogLandingPage) coupled with [these examples](https://docs.sentinel-hub.com/api/latest/api/process/examples/) it was possible to structure the following request in JSON format. The upper portion of the JSON specifies the date range, region of interest (bbox); acceptable level of cloud cover (maxCloudCoverage);type of satellite footage required (type), resolution (width, height) and coordinate system (crs) while the lower section consists of evalscript to process the imagery.
 
-```{=html}
-<pre style="background-color:black;><span style="color: white;">{
+```{python, eval=FALSE}
+  request={
     "input": {
         "bounds": {
             "properties": {
-                <abbr title="Specify coordinate system">"crs"</abbr>: "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+                "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
             },
-            <abbr title="Bounding box: Coordinates illustrating region of interest">"bbox"</abbr>: [
-                38.93641,
-                39.05947,
-                35.92829,
-                35.97450
+            "bbox": [
+                13.822174072265625,
+                45.85080395917834,
+                14.55963134765625,
+                46.29191774991382
             ]
         },
         "data": [
             {
-                "type": "sentinel-2-l1c",
+                "type": "sentinel-2-l2a",
                 "dataFilter": {
                     "timeRange": {
-                        "from": "2019-10-01T00:00:00Z",
-                        "to": "2019-12-31T00:00:00Z"
-                    },
-                    <abbr title="Maximum level of acceptable cloud coverage (0-100%)">"maxCloudCoverage"</abbr>:5
+                        "from": "2018-10-01T00:00:00Z",
+                        "to": "2018-12-31T00:00:00Z"
+                    }
                 }
             }
         ]
     },
-    <abbr title="Specify size of downloaded images">"output":</abbr> {
-        "width": 2000,
-        "height": 2000
+    "output": {
+        "width": 512,
+        "height": 512
     }
-},
-    <span style="color: white;">"evalscript"</span>: "//VERSION=3\n\nfunction setup() {\n  return {\n    input: [\"B02\", \"B03\", \"B04\"],\n    output: { \n      bands: 3,\n      sampleType: \"AUTO\" // default value - scales the output values from [0,1] to [0,255].   \n     }\n  }\n}\n\nfunction evaluatePixel(sample) {\n  return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02]\n}"
 }
-</pre>
 ```
-text</span></strong>
+
+`{=html,class.source = 'fold-hide'} <pre style="background-color:black;><span style="color: white;">{     "input": {         "bounds": {             "properties": {                 <abbr title="Specify coordinate system">"crs"</abbr>: "http://www.opengis.net/def/crs/OGC/1.3/CRS84"             },             <abbr title="Bounding box: Coordinates illustrating region of interest">"bbox"</abbr>: [                 38.93641,                 39.05947,                 35.92829,                 35.97450             ]         },         "data": [             {                 "type": "sentinel-2-l1c",                 "dataFilter": {                     "timeRange": {                         "from": "2019-10-01T00:00:00Z",                         "to": "2019-12-31T00:00:00Z"                     },                     <abbr title="Maximum level of acceptable cloud coverage (0-100%)">"maxCloudCoverage"</abbr>:5                 }             }         ]     },     <abbr title="Specify size of downloaded images">"output":</abbr> {         "width": 2000,         "height": 2000     } },     <span style="color: white;">"evalscript"</span>: "//VERSION=3\n\nfunction setup() {\n  return {\n    input: [\"B02\", \"B03\", \"B04\"],\n    output: { \n      bands: 3,\n      sampleType: \"AUTO\" // default value - scales the output values from [0,1] to [0,255].   \n     }\n  }\n}\n\nfunction evaluatePixel(sample) {\n  return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02]\n}" } </pre>`
 
 Ideally the POST request should be sent as a multipart form, which would allow the evalscript to be written in ordinary JSON. HoweverI was unable to do this correctly, so as a workaround escaped the entire JSON Evalscript section (using [this tool)](https://www.freeformatter.com/json-escape.html) and sent it as part of the same request. The image information was then extracted from the response object and the file saved as png.
 
-```{r,class.source = 'fold-show', eval=FALSE}
+```{r,eval=FALSE}
 ### --- Build request
 
 request <- read_file("R Scripts/POST body request") # loads request from JSON in text file
@@ -164,6 +161,10 @@ response <- httr::POST(sentinel_endpoint,
                                    `Content-Type`="application/json", 
                                    Authorization = paste("Bearer", token$credentials[[1]], sep = " ")))
 ```
+
+### Function to automatically download Sentinel-2 Data
+
+To simplify the download process
 
 \
 
