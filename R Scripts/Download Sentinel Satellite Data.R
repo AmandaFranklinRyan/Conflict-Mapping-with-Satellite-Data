@@ -33,11 +33,13 @@ token <- oauth2.0_token(endpoint = endpoint,
 
 ### --- Build request
 
-start_date <- lubridate::ymd("2019-10-01")
+start_date <- lubridate::ymd("2017-5-01")
 period_length_days <- 7
-number_periods <- 8
+number_periods <- 32
 
 for (i in 0:number_periods-1){
+  
+  Sys.sleep(1)
   
   request <- read_file("R Scripts/POST body request") # loads request from JSON in text file
   

@@ -4,12 +4,18 @@
             "properties": {
                 "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
             },
-            "bbox": [
-                38.93641,
-                39.05947,
-                35.92829,
-                35.97450
-            ]
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [38.93641, 35.92829],
+                  [39.05947, 35.92829],
+                  [39.05947, 35.9745],
+                  [38.93641, 35.9745],
+                  [38.93641, 35.92829]
+                ]
+              ]
+            }
         },
         "data": [
             {
@@ -26,8 +32,8 @@
         ]
     },
     "output": {
-        "width": 2000,
-        "height": 2000
+        "width": 1225,
+        "height": 500
     },
     "evalscript": "//VERSION=3\n\nfunction setup() {\n  return {\n    input: [\"B02\", \"B03\", \"B04\"],\n    output: { \n      bands: 3,\n      sampleType: \"AUTO\" // default value - scales the output values from [0,1] to [0,255].   \n     }\n  }\n}\n\nfunction evaluatePixel(sample) {\n  return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02]\n}"
 }
