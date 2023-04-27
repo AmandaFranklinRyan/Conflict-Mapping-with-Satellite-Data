@@ -252,7 +252,66 @@ centre_x2 <- mean(raqqa_data_summarised$coords.x2)
 
 ```
 
-As the visualisation demonstrates the vast majority of buildings (10,732) are simply labelled "Building (General / Default)" and I wondered whether it was possible to find out further details using reverse geocoding. Using the GeoCage API, I looked up the latitude and longitude coordinates for each damaged building and extracted the [formatted](https://opencagedata.com/api#formatted) component of the response object which in some cases contained additional address details. After I exhausted my daily request limit (2500 queries) I noticed there were only 99 unique entries which didn't contain the unhelpful "unnamed road" text so I didn't add this new information to the dataframe. However it might to be interesting to explore whether other APIS could provide additional data.
+As the visualisation demonstrates the vast majority of buildings (10,732) are simply labelled "Building (General / Default)" and I wondered whether it was possible to find out further details using reverse geocoding. Using the GeoCage API, I looked up the latitude and longitude coordinates for each damaged building and extracted the [formatted](https://opencagedata.com/api#formatted) component of the response object which in some cases contained additional address details. After I exhausted my daily request limit (2500 queries) I noticed there were only 99 unique entries which didn't contain the unhelpful "unnamed road" text so I didn't add this new information to the dataframe. However it might to be interesting to explore whether other APIS could provide additional data. and if there are other fields of the GeoCage API which could be useful.
+
+```{r, eval=FALSE}
+library(httr)
+library(jsonlite)
+library(dplyr)
+
+### --- Load Raqqa Geographic data and select columns of interest
+
+#Load UNOSAT data in dataframe form
+raqqa_data <- readRDS("Datasets/Reshaped UNOSAT data.rds")
+
+raqqa_data_summarised <- raqqa_data %>% 
+  select(SiteID,Neigh,damage_year,destruction_type,coords.x1,coords.x2) 
+
+###--- Connect to GeoCage API perforl reverse geocoding on all destruction sites to get
+# more information on the sites as just referred to as Building "(General / Default)" in the UNOSAT data
+
+#Convert latitude and longitude columns to vectors
+longitude <- (raqqa_data$coords.x1)
+latitude <- (raqqa_data$coords.x2)
+
+# Connect to OpenCage API by defining API key and endpoint
+api_key <- readRDS("Secrets/api_key_open_cage.rds")
+base_url <- "https://api.opencagedata.com/geocode/v1/json"
+
+list_extra_info <- list() # for storing list of additional address information
+
+for(x in 1:length(longitude)){
+  Sys.sleep=0.1  #to respect API limits
+  current_location <- paste(latitude[[x]],"+",longitude[[x]], sep="") # create query string from dataframe information
+  geocoding_response <- httr::GET(url = base_url, 
+                                  query = list(key = api_key, q = current_location)) 
+  current_address <- httr::content(geocoding_response)
+  current_extra_info <- current_address$results[[1]]$formatted # additional information in formatted section of results
+  list_extra_info <-append(list_extra_info,current_extra_info)
+}
+
+#Convert list back to a dataframe
+extra_data_dataframe <- data.frame(list_extra_info)
+transpose <- data.frame(t(extra_data_dataframe))
+rownames(transpose) <- seq(from=1, to=length(list_extra_info), by=1)
+
+#Filter for useful additional information by dropping all rows that contain only "unnamed road"
+filtered_address_info <- transpose %>% 
+  filter(!str_detect(t.extra_data_dataframe., "unnamed road")) %>% 
+  distinct()
+
+#Export final list of additional information
+saveRDS(filtered_address_info,"Visualisations/filtered address info.rds")
+
+```
+
+```{r, messages=FALSE, warnings=FALSE}
+library(rio)
+library(data.table)
+address_info <- rio::import("../Visualisations/filtered address info.rds")
+address_info_table <- data.table(head(address_info, 5))
+address_info_table
+```
 
 ## Medium Resolution Satellite Data (Sentinel-1 and Sentinel-2)
 
@@ -429,7 +488,7 @@ It was also necessary to specify the dimensions of the returned images as select
   pixels_dimensions_width= round(normalised_lat_km*pixels_dimensions_height)
 ```
 
-Finally the date the image was taken was added to the image, this was simple as the date (current_date) was already saved in memory.
+Finally the date the image was taken was added to the image, this was simple as the date (current_date) was already saved in memory. The function was then used to download 32 real colour satellite images from May-November 2017 with a maximum cloud cover of 10%.
 
 ```{r, eval=FALSE}
  ### Annotate png with Date---
@@ -447,7 +506,7 @@ Finally the date the image was taken was added to the image, this was simple as 
 
 ### Data Visualisation: Coalition Airstrikes Against Raqqa: May-October 2017
 
-Using [this tutorial](file:///C:/Users/amand/Zotero/storage/WBTPXVZT/how-to-build-a-gif-of-satellite-imagery-in-r.html) an animated GIF was created from the downloaded satellite imagery showing a stop animation of the 4-month bombardment of Raqqa.The animation clearly shows the destruction of the city starting in the suburbs in the North West of the city and gradually moving towards the centre. On October 6th a huge plume of black smoke is clearly visible.
+Using [this tutorial](file:///C:/Users/amand/Zotero/storage/WBTPXVZT/how-to-build-a-gif-of-satellite-imagery-in-r.html) an animated GIF was created from the downloaded satellite imagery showing a stop animation of the 4-month bombardment of Raqqa.The animation clearly shows the destruction of the city starting in the suburbs in the North West of the city and gradually moving towards the centre. On October 9th a huge plume of black smoke is clearly visible.
 
 <img src="../Visualisations/raqqa2.gif" align="left"/>
 
@@ -464,7 +523,9 @@ raqqa_gif2 <- list.files(path = "../Sentinel 2A Imagery/", pattern = "*.png", fu
   image_write("raqqa2.gif") 
 
 ```
+## Conclusion
 
+While the project suceeded in visualising the position of the strikes using UNOSAT data; writing a function to easily download Sentinel-2 imagery and downloading and creating an animated GIF of the images, I would appreciate the opportunity to develop the project further ideally as part of a machine learning seminar paper. It would also like to refine the function to download data from Sentinel-1 as this would allow a machine learning model to be trained with polarisation and phase data too. Initially I thought I would like to try to exactly replicate Amnesty International's Strike Project using machine learning on medium resolution satellite imagery, however there are many possibilities. The methodology could potentially be applied identifying destruction in the recent earthquake in Turkey/Syria or mapping conflict in a completely different terrain for example during the recent violence in Sudan. It might also be interesting to explore if the satellite data on building destruction could be enriched with information from newspaper articles, other geocoding APIs or social media (Geotagged tweets).
 \
 
 \
