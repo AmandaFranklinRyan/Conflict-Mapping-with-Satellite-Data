@@ -34,11 +34,11 @@ Amnesty International enlisted thousands of digital activists to analyse a serie
 
 This project aims to collect the dataset necessary to replicate Amnesty's Strike Tracker Project. However instead of using high resolution human labelled satellite images, medium resolution Sentinel-1 and Sentinel-2 images will be downloaded and in a future seminar paper (hopefully) used to investigate the efficacy of using machine learning methods to automatically detect building damage and to generate a destruction timeline using a simplified version of the methodology described in x. More specifically the project will:
 
--   Identify and download suitable satellite images from the SentinelHub API, an R wrapper will also be written to simplify this process
+-   Identify and download suitable Sentinel-2 satellite images from the SentinelHub API, an R function will also be written to simplify this process
 
 -   Collect and visualise data from UNOSAT illustrating the position of the coalition strikes (for the purposes of the future machine learning model this represents the ground truth)
 
--   Download series of news articles from Guardian/New York Times API illustrating who different media outlets hold responsible for the civilian deaths.
+-   Create a GIF animation with the downloaded satellite data illustrating the destruction of Raqqa
 
 ## Medium Resolution Satellite Data (Sentinel-1 and Sentinel-2)
 
@@ -50,11 +50,13 @@ Sentinel -1 was launched by the European Commission's Copernicus Project a year 
 
 Real colour images can be constructed by superimposing red, green and blue bands but often it is more revealing to use false colour. The optimal frequency depends on the exact nature of the task. Infrared is generally preferable for forestry mapping as soil and vegetation are difficult to differentiate in true colour imagery (as their spectral reflectances are almost identical in the visible range), however there is a difference of almost 30% in the mid-infrared band. [@customs]
 
-Frequencies can also be combined to accentuate features of interest, blending green (band 3), red (band 4) and infrared (band 8) creates a "false colour" image amplifying the infrared band. In 2020, Amnesty International used false colour imagery to identify vegetation burnt by gun propellant to pinpoint the firing position of Tigray strikes on Eritrea. [@https://citizenevidence.org/author/wallace-fan2023]Hundreds of [standard combinations](https://www.indexdatabase.de/db/i.php?offset=1) exist with the majority used to highlight vegetation, its water content and the chemical composition of the surrounding soil for use in crop monitoring.(include experimental imagery here from EO browser, Raqqa, destroyed buildings in blue+ resolution etc, talk about trade off with resolution, size of antenna, include formulae for some of the different combinations)
+Frequencies can also be combined to accentuate features of interest, blending green (band 3), red (band 4) and infrared (band 8) creates a "false colour" image amplifying the infrared band. In 2020, Amnesty International used false colour imagery to identify vegetation burnt by gun propellant to pinpoint the firing position of Tigray strikes on Eritrea. [@https://citizenevidence.org/author/wallace-fan2023]Hundreds of [standard combinations](https://www.indexdatabase.de/db/i.php?offset=1) exist with the majority used to highlight vegetation, its water content and the chemical composition of the surrounding soil for use in crop monitoring.The images below show the bombing of Raqqa on October 10th, 2017 in different frequency bands. The real colour image clearly shows the plume of smoke over the city, but the SWIR band (based on bands 12, 8A and 4) shows individual fires. The Normalised Difference Moisture Index (NDMI) appears bright red over the smoke indicating the low level of humidity here, the bluer sections at the edges are fields so have a higher level of moisture.
 
-```{r, echo=FALSE,out.width="49%", out.height="20%",fig.cap="caption",fig.show='hold',fig.align='center'}
-knitr::include_graphics(c("../Visualisations/EO Browser Real Colour Rainforest Fires.png",
-                          "../Visualisations/EO Browser False Colour Rainforest Fires.png"))
+```{r, echo=FALSE,out.width="33%", out.height="33%",fig.cap="Images from October 10 2017 in different frequency bands, showing real colour (left), SWIR (centre) and moisture index (right)",fig.show='hold',fig.align='left'}
+knitr::include_graphics(c("../Visualisations/Raqqa Real Colour.png",
+                          "../Visualisations/Raqqa SWIR.png",
+                          
+                          "../Visualisations/Raqqa Water Stress.png"))
 ```
 
 To choose suitable bands for identifying building destruction, I followed a simplified version of the methodology described by Pfeiffle (2022) and Putri et al. (2022). [@sandhiniputri2022] [Conflict identification] Pfeiffle used machine learning methods to automatically identify building damage from airstrikes in Iraq and Northern Syria, choosing all Sentinel-2 images with a 10m resolution (red, green, blue and NIR). Assuming the damage profile of bombed buildings would be similar to those damaged in earthquakes, I also downloaded Sentinel-1 GRD imagery as Putri et al. concluded a fusion of Sentinel-1 and Sentinel-2 data yielded the highest accuracy in their random forest model identifying building damage from the 2018 Lombok earthquake. It would also be interesting to explore the possibility of using phase or polarisation parameters in the Sentinel-1 data to pinpoint destruction.
@@ -188,9 +190,9 @@ To make the file structure as clear as possible the JSON body of the request was
   request_with_cloudcover <- str_replace(request_with_satellite, "InsertCloudCoverHere", as.character(cloud_cover))
 ```
 
-It is easiest to define the area of interest using the maximum and minimum longitudes and latitudes, however using the bbox argument in the JSON selected a much larger area than expected, so this function uses the type Polygon paramter instead. This argument takes a series of geo-coordinates and joins them up so the first and last coordinate must be the same to close the shape.
+It is easiest to define the area of interest using the maximum and minimum longitudes and latitudes, however using the bbox argument in the JSON selected a much larger area than expected, so this function uses the type **Polygon** parameter instead. This argument takes a series of geo-coordinates and joins them up so the first and last coordinate must be the same to close the shape.
 
-It was also necessary to specify the dimensions of the returned images as selecting width and height at random led to distorted, skewed pictures. Using the code below the size of region of interest in degrees was calculated then converted to kilometres using standard formulae. By calculating the ratio of the sides of the rectangle, the optimum height width ratio was calculated and combined with the users choice of pixels_dimensions_height to define the optimal image dimensions.
+It was also necessary to specify the dimensions of the returned images as selecting width and height at random led to distorted, skewed pictures. Using the code below the size of region of interest in degrees was calculated then converted to kilometres using standard formulae. By calculating the ratio of the sides of the rectangle, the optimum height width ratio was calculated and combined with the user's choice of pixels_dimensions_height to define the optimal image dimensions.
 
 ```{r, eval=FALSE}
  ### Calculate optimum image size----
@@ -212,6 +214,7 @@ It was also necessary to specify the dimensions of the returned images as select
   # Calculate width of output image based on user defined pixel height
   pixels_dimensions_width= round(normalised_lat_km*pixels_dimensions_height)
 ```
+
 Finally the date the image was taken was added to the image, this was simple as the date (current_date) was already saved in memory.
 
 ```{r, eval=FALSE}
@@ -227,9 +230,10 @@ Finally the date the image was taken was added to the image, this was simple as 
   processed_png <- image_read(data_filename)
   annotated_png <- image_annotate(processed_png, complete_date,location = "+10+450", size = 30, color = "white")
 ```
+
 ### Data Visualisation: Coalition Airstrikes Against Raqqa: May-October 2017
 
-Using this tutorial an animated GIF was created from the downloaded satellite imagery showing a stop animation of the 4-month bombardment of Raqqa.The animation clearly shows the destruction of the city starting in the suburbs in the North West of the city and gradually moving towards the centre. On October 6th a huge plume of black smoke is clearly visible.
+Using [this tutorial](file:///C:/Users/amand/Zotero/storage/WBTPXVZT/how-to-build-a-gif-of-satellite-imagery-in-r.html) an animated GIF was created from the downloaded satellite imagery showing a stop animation of the 4-month bombardment of Raqqa.The animation clearly shows the destruction of the city starting in the suburbs in the North West of the city and gradually moving towards the centre. On October 6th a huge plume of black smoke is clearly visible.
 
 <img src="../Visualisations/raqqa2.gif" align="left"/>
 
@@ -247,7 +251,6 @@ raqqa_gif2 <- list.files(path = "../Sentinel 2A Imagery/", pattern = "*.png", fu
 
 ```
 
-
 \
 
 \
@@ -255,5 +258,3 @@ raqqa_gif2 <- list.files(path = "../Sentinel 2A Imagery/", pattern = "*.png", fu
 ```{r cars}
 summary(cars)
 ```
-
-
