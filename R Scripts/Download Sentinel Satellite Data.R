@@ -7,7 +7,6 @@ library(stringr)
 
 ### --- Oauth authorisation to access API
 
-
 # IDs and secrets
 client_id <- readRDS("Secrets/oauth_client_id.rds")
 client_secret <- readRDS("Secrets/oauth_secret.rds")
@@ -33,16 +32,22 @@ token <- oauth2.0_token(endpoint = endpoint,
 
 ### --- Build request
 
+sentinel-2-l1c
+
+download_satellite data <- function(start_date, period_length_days,number_periods, min_lat,
+                                    max_lat,min_long,max_long, satellite_type, cloud_cover){
+
 start_date <- lubridate::ymd("2017-5-01")
 period_length_days <- 7
-number_periods <- 32
+number_periods <- 2
 
 for (i in 0:number_periods-1){
   
-  Sys.sleep(1)
+  Sys.sleep(1) #to respect API download limit rates
   
   request <- read_file("R Scripts/POST body request") # loads request from JSON in text file
   
+  ### Create date parameters of request body----------
   current_date_start <- start_date+days(i*period_length_days)
   current_date_end <- start_date+days((i+1)*period_length_days)
   
@@ -50,7 +55,16 @@ for (i in 0:number_periods-1){
   end_date_as_string <- format(current_date_end)
   
   request_with_start <- str_replace(request, "InsertStartDateHere", start_date_as_string)
-  request_with_end <- str_replace(request_with_start, "InsertEndDateHere", end_date_as_string)
+  request_with_end <- str_replace(request_with_start, "InsertEndDateHere", satellite_type)
+  
+  ### Create satellite type parameter of request body----------
+  request_with_satellite <- str_replace(request_with_end, "InsertSatelliteTypeHere", end_date_as_string)
+  
+  ### Create cloud cover parameter of request body----------
+  request_with_cloudcover <- str_replace(request_with_satellite, "InsertCloudCoverHere", cloud_cover)
+  
+  ### Create cloud cover parameter of request body----------
+  
   
   sentinel_endpoint <- "https://services.sentinel-hub.com/api/v1/process"
   

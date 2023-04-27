@@ -19,13 +19,13 @@
         },
         "data": [
             {
-                "type": "sentinel-2-l1c",
+                "type": "InsertSatelliteTypeHere",
                 "dataFilter": {
                     "timeRange": {
                         "from": "InsertStartDateHereT00:00:00Z",
                         "to": "InsertEndDateHereT00:00:00Z"
                     },
-                    "maxCloudCoverage":10,
+                    "maxCloudCoverage":InsertCloudCoverHere,
                     "mosaickingOrder": "leastCC"
                 }
             }

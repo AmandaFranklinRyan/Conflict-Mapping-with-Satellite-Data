@@ -28,7 +28,7 @@ While [high resolution Maxar data](https://www.maxar.com/products/satellite-imag
 
 ### Raqqa: The Perfect Perpetratorless Crime
 
-Launched in 2019, Amnesty International's [Strike Tracker](https://decoders.amnesty.org/projects/strike-tracker#decode-results) used satellite imagery coupled with crowd sourced image labelling to create an accurate timeline for the 2017 US led Coalition bombing in the Syrian city of Raqqa. Attempting to destroy Islamic State's "Caliphate", Coalition forces fired over 30,000 missiles in a four-month bombardment, destroying 80% of the city and killing and injuring thousands of civilians. Pinning down responsibility was challenging as the Coalition accused ISIS, Russia blamed the US and the US denied all responsibility ruling less than one percent of civilian casualty reports "credible".[@april252019]
+Created in 2019, Amnesty International's [Strike Tracker](https://decoders.amnesty.org/projects/strike-tracker#decode-results) used satellite imagery coupled with crowd sourced image labelling to create an accurate timeline for the 2017 US led Coalition bombing in the Syrian city of Raqqa. Attempting to destroy Islamic State's "Caliphate", Coalition forces fired over 30,000 missiles in a four-month bombardment, destroying 80% of the city and killing and injuring thousands of civilians. Pinning down responsibility was challenging as the Coalition accused ISIS, Russia blamed the US and the US denied all responsibility ruling less than one percent of civilian casualty reports "credible".[@april252019]
 
 Amnesty International enlisted thousands of digital activists to analyse a series of satellite photos of the same building to identify the exact date it was destroyed. After following a short interactive tutorial volunteers were presented with a new series of images to label. Combining the crowd sourced strike timeline with witness testimony and interviews, Amnesty forced the Coalition to admit responsibility for 159 civilian deaths.[@isconfl2019]
 
@@ -36,9 +36,9 @@ This project aims to collect the dataset necessary to replicate Amnesty's Strike
 
 -   Identify and download suitable satellite images from the SentinelHub API, an R wrapper will also be written to simplify this process
 
--    Collect and visualise data from UNOSAT illustrating the position of the coalition strikes (for the purposes of the future machine learning model this represents the ground truth)
+-   Collect and visualise data from UNOSAT illustrating the position of the coalition strikes (for the purposes of the future machine learning model this represents the ground truth)
 
--    Download series of news articles from Guardian/New York Times API illustrating who different media outlets hold responsible for the civilian deaths.
+-   Download series of news articles from Guardian/New York Times API illustrating who different media outlets hold responsible for the civilian deaths.
 
 ## Medium Resolution Satellite Data (Sentinel-1 and Sentinel-2)
 
