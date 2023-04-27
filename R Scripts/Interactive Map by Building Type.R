@@ -45,33 +45,113 @@ grouped_building_plot <-   Building_only_dataframe %>%
                    group="General Building")  
 
 # Dataframe with only Fields
-severe_damage_only_dataframe <- coalition_strikes_2017 %>% 
-  filter(destruction_type=="Severe Damage")
+field_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(SiteID=="Field")
 
-#Create severe damage layer
-grouped_damage_plot <- grouped_damage_plot %>% 
-  addCircleMarkers(lng=severe_damage_only_dataframe$coords.x1, 
-                   lat=severe_damage_only_dataframe$coords.x2,
+#Create field layer
+grouped_building_plot <- grouped_building_plot %>% 
+  addCircleMarkers(lng=field_only_dataframe$coords.x1, 
+                   lat=field_only_dataframe$coords.x2,
                    radius = 3, 
                    stroke=FALSE,
                    fillOpacity= 1,
-                   color = "#ce5e09", 
-                   label=~SiteID,
-                   group="Severe Damage") %>% 
-  addLayersControl(overlayGroups = c("Destroyed", "Severe Damage"))
+                   color = "#d73027", 
+                   label=~destruction_type,
+                   group="Field") %>% 
+  addLayersControl(overlayGroups = c("General Building", "Field"))
 
-# Dataframe with only moderately damaged buildings
-moderate_damage_only_dataframe <- coalition_strikes_2017 %>% 
-  filter(destruction_type=="Moderate Damage")
+# Dataframe with only roads
+road_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(SiteID=="Road")
 
-#Create moderate damage layer
-grouped_damage_plot <- grouped_damage_plot %>% 
-  addCircleMarkers(lng=moderate_damage_only_dataframe$coords.x1, 
-                   lat=moderate_damage_only_dataframe$coords.x2,
+#Create road only layer
+grouped_building_plot <- grouped_building_plot %>% 
+  addCircleMarkers(lng=road_only_dataframe$coords.x1, 
+                   lat=road_only_dataframe$coords.x2,
                    radius = 3, 
                    stroke=FALSE,
                    fillOpacity= 1,
-                   color = "#ffa600", 
-                   label=~SiteID,
-                   group="Moderate Damage") %>% 
-  addLayersControl(overlayGroups = c("Destroyed", "Severe Damage", "Moderate Damage"))
+                   color = "#f46d43", 
+                   label=~destruction_type,
+                   group="Road") %>% 
+  addLayersControl(overlayGroups = c("General Building", "Field", "Road"))
+
+# Dataframe with only schools/universities
+school_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(SiteID=="School / University")
+
+#Create school only layer
+grouped_building_plot <- grouped_building_plot %>% 
+  addCircleMarkers(lng=school_only_dataframe$coords.x1, 
+                   lat=school_only_dataframe$coords.x2,
+                   radius = 3, 
+                   stroke=FALSE,
+                   fillOpacity= 1,
+                   color = "#fee090", 
+                   label=~destruction_type,
+                   group="School/University") %>% 
+  addLayersControl(overlayGroups = c("General Building", "Field", "Road", "School/University"))
+
+# Dataframe with only Industrial facilities
+industrial_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(SiteID=="Industrial Facility")
+
+#Create industrial only layer
+grouped_building_plot <- grouped_building_plot %>% 
+  addCircleMarkers(lng=industrial_only_dataframe$coords.x1, 
+                   lat=industrial_only_dataframe$coords.x2,
+                   radius = 3, 
+                   stroke=FALSE,
+                   fillOpacity= 1,
+                   color = "#ffffbf", 
+                   label=~destruction_type,
+                   group="Industrial Facility") %>% 
+  addLayersControl(overlayGroups = c("General Building", "Field", "Road", "School/University", "Industrial Facility"))
+
+# Dataframe with only mosques
+mosque_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(SiteID=="Mosque")
+
+#Create mosque only layer
+grouped_building_plot <- grouped_building_plot %>% 
+  addCircleMarkers(lng=mosque_only_dataframe$coords.x1, 
+                   lat=mosque_only_dataframe$coords.x2,
+                   radius = 3, 
+                   stroke=FALSE,
+                   fillOpacity= 1,
+                   color = "black", 
+                   label=~destruction_type,
+                   group="Mosque") %>% 
+  addLayersControl(overlayGroups = c("General Building", "Field", "Road", "School/University", "Industrial Facility", "Mosque"))
+
+# Dataframe with only government buildings
+government_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(SiteID=="Government Building")
+
+#Create government building only layer
+grouped_building_plot <- grouped_building_plot %>% 
+  addCircleMarkers(lng=government_only_dataframe$coords.x1, 
+                   lat=government_only_dataframe$coords.x2,
+                   radius = 3, 
+                   stroke=FALSE,
+                   fillOpacity= 1,
+                   color = "#4575b4", 
+                   label=~destruction_type,
+                   group="Government Building") %>% 
+  addLayersControl(overlayGroups = c("General Building", "Field", "Road", "School/University", "Industrial Facility", "Mosque", "Government Building"))
+
+# Dataframe with only hospitals
+hospital_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(SiteID=="Hospital")
+
+#Create government building only layer
+grouped_building_plot <- grouped_building_plot %>% 
+  addCircleMarkers(lng=hospital_only_dataframe$coords.x1, 
+                   lat=hospital_only_dataframe$coords.x2,
+                   radius = 3, 
+                   stroke=FALSE,
+                   fillOpacity= 1,
+                   color = "#313695", 
+                   label=~destruction_type,
+                   group="Hospital") %>% 
+  addLayersControl(overlayGroups = c("General Building", "Field", "Road", "School/University", "Industrial Facility", "Mosque", "Government Building","Hospital"))
