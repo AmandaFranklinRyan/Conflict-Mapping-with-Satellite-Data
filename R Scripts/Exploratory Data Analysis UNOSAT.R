@@ -3,6 +3,7 @@ library(ggplot2)
 library(lubridate)
 library(data.table)
 library(formattable)
+library(sen2r)
 
 #Load UNOSAT data in dataframe form
 raqqa_data <- readRDS("Datasets/Reshaped UNOSAT data.rds")
@@ -75,7 +76,6 @@ min_x2 <- min(raqqa_data_summarised$coords.x2)
 
 centre_x1 <- mean(raqqa_data_summarised$coords.x1)
 centre_x2 <- mean(raqqa_data_summarised$coords.x2)
-
 
 
 
