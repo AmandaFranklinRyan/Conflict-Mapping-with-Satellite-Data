@@ -229,15 +229,14 @@ Finally the date the image was taken was added to the image, this was simple as 
 ```
 ### Data Visualisation: Coalition Airstrikes Against Raqqa: May-October 2017
 
-Using this tutorial an animated GIF was created from the downloaded satellite imagery showing a stop animation of the 4-month bombardment of Raqqa.
+Using this tutorial an animated GIF was created from the downloaded satellite imagery showing a stop animation of the 4-month bombardment of Raqqa.The animation clearly shows the destruction of the city starting in the suburbs in the North West of the city and gradually moving towards the centre. On October 6th a huge plume of black smoke is clearly visible.
 
-<img src="C:\Users\amand\OneDrive\Bureau\Conflict Mapping using Satellite Imagery\raqqa2.gif" align="left"/>
+<img src="../Visualisations/raqqa2.gif" align="left"/>
 
 ```{r gapgif, eval=FALSE}
 library(dplyr)
 library(purrr) 
 library(magick) #For animation
-
 
 raqqa_gif2 <- list.files(path = "../Sentinel 2A Imagery/", pattern = "*.png", full.names = T) %>% 
   map(image_read) %>% 
