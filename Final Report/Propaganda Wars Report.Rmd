@@ -252,6 +252,178 @@ centre_x2 <- mean(raqqa_data_summarised$coords.x2)
 
 ```
 
+```{r, eval=FALSE}
+
+library(leaflet)
+library(dplyr)
+library(rio)
+library(leaflet.extras) # for extra features like adding search box and reset map button
+library(htmltools) #for escaping html
+
+###--- Create interactive leaflet map of Raqqa
+
+###--- Import UNOSAT data and focus on October 2017 (Coalition bombing)
+unosat_data <- rio::import("../Datasets/Reshaped UNOSAT data.rds")
+
+coalition_strikes_2017 <- unosat_data %>% 
+  filter(damage_year=="2017/10/21")
+
+###--- Create plot illustrating distribution of destroyed, moderately damaged and destroyed buildings---
+
+# Create custom destruction colour palette
+building_palette <- leaflet::colorFactor(palette=c("#00876c","#003f5c", "#85b96f", "#bdcf75","#f6bc63","#f19452","#e66a4d","#d43d51"),
+                                            levels=c(" General Building","Field","Road","School/University","Industrial Facility","Mosque","Government Building","Hospital"))
+
+###--- Create plot with groups to make it look less cluttered---
+
+# Dataframe with only generic buildings buildings
+building_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(SiteID=="Building (General / Default)")
+
+grouped_building_plot <-   Building_only_dataframe %>%
+  leaflet()%>% 
+  addProviderTiles("OpenStreetMap") %>% 
+  setView(lng=39.00897, lat= 35.95394, zoom=14) %>% 
+  setMaxBounds(lng1 = 39.05947, 
+               lat1 = 35.9745, 
+               lng2 = 38.93641, 
+               lat2 = 35.92829) %>% 
+  clearMarkers() %>%  
+  addCircleMarkers(lng=building_only_dataframe$coords.x1, 
+                   lat=building_only_dataframe$coords.x2,
+                   radius = 2, 
+                   stroke=FALSE,
+                   fillOpacity= 0.8,
+                   color = "#4fa16e", 
+                   label=~destruction_type,
+                   group="General Building")  
+
+# Dataframe with only Fields
+field_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(SiteID=="Field")
+
+#Create field layer
+grouped_building_plot <- grouped_building_plot %>% 
+  addCircleMarkers(lng=field_only_dataframe$coords.x1, 
+                   lat=field_only_dataframe$coords.x2,
+                   radius = 2, 
+                   stroke=FALSE,
+                   fillOpacity= 1,
+                   color = "#003f5c", 
+                   label=~destruction_type,
+                   group="Field") %>% 
+  addLayersControl(overlayGroups = c("General Building", "Field"))
+
+# Dataframe with only roads
+road_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(SiteID=="Road")
+
+#Create road only layer
+grouped_building_plot <- grouped_building_plot %>% 
+  addCircleMarkers(lng=road_only_dataframe$coords.x1, 
+                   lat=road_only_dataframe$coords.x2,
+                   radius = 2, 
+                   stroke=FALSE,
+                   fillOpacity= 1,
+                   color = "#85b96f", 
+                   label=~destruction_type,
+                   group="Road") %>% 
+  addLayersControl(overlayGroups = c("General Building", "Field", "Road"))
+
+# Dataframe with only schools/universities
+school_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(SiteID=="School / University")
+
+#Create school only layer
+grouped_building_plot <- grouped_building_plot %>% 
+  addCircleMarkers(lng=school_only_dataframe$coords.x1, 
+                   lat=school_only_dataframe$coords.x2,
+                   radius = 2, 
+                   stroke=FALSE,
+                   fillOpacity= 1,
+                   color = "#bdcf75", 
+                   label=~destruction_type,
+                   group="School/University") %>% 
+  addLayersControl(overlayGroups = c("General Building", "Field", "Road", "School/University"))
+
+# Dataframe with only Industrial facilities
+industrial_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(SiteID=="Industrial Facility")
+
+#Create industrial only layer
+grouped_building_plot <- grouped_building_plot %>% 
+  addCircleMarkers(lng=industrial_only_dataframe$coords.x1, 
+                   lat=industrial_only_dataframe$coords.x2,
+                   radius = 2, 
+                   stroke=FALSE,
+                   fillOpacity= 1,
+                   color = "#f6bc63",
+                   label=~destruction_type,
+                   group="Industrial Facility") %>% 
+  addLayersControl(overlayGroups = c("General Building", "Field", "Road", "School/University", "Industrial Facility"))
+
+# Dataframe with only mosques
+mosque_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(SiteID=="Mosque")
+
+#Create mosque only layer
+grouped_building_plot <- grouped_building_plot %>% 
+  addCircleMarkers(lng=mosque_only_dataframe$coords.x1, 
+                   lat=mosque_only_dataframe$coords.x2,
+                   radius = 2, 
+                   stroke=FALSE,
+                   fillOpacity= 1,
+                   color = "#f19452", 
+                   label=~destruction_type,
+                   group="Mosque") %>% 
+  addLayersControl(overlayGroups = c("General Building", "Field", "Road", "School/University", "Industrial Facility", "Mosque"))
+
+# Dataframe with only government buildings
+government_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(SiteID=="Government Building")
+
+#Create government building only layer
+grouped_building_plot <- grouped_building_plot %>% 
+  addCircleMarkers(lng=government_only_dataframe$coords.x1, 
+                   lat=government_only_dataframe$coords.x2,
+                   radius = 2, 
+                   stroke=FALSE,
+                   fillOpacity= 1,
+                   color = "#e66a4d", 
+                   label=~destruction_type,
+                   group="Government Building") %>% 
+  addLayersControl(overlayGroups = c("General Building", "Field", "Road", "School/University", "Industrial Facility", "Mosque", "Government Building"))
+
+# Dataframe with only hospitals
+hospital_only_dataframe <- coalition_strikes_2017 %>% 
+  filter(SiteID=="Hospital")
+
+#Create hospital only layer
+grouped_building_plot <- grouped_building_plot %>% 
+  addCircleMarkers(lng=hospital_only_dataframe$coords.x1, 
+                   lat=hospital_only_dataframe$coords.x2,
+                   radius = 2, 
+                   stroke=FALSE,
+                   fillOpacity= 1,
+                   color = "#d43d51", 
+                   label=~destruction_type,
+                   group="Hospital") %>% 
+  addLayersControl(overlayGroups = c("General Building", "Field", "Road", "School/University", "Industrial Facility", "Mosque", "Government Building","Hospital")) %>% 
+  addLegend(pal = building_palette,
+            values = c("General Building", "Field", "Road", "School/University", "Industrial Facility", "Mosque", "Government Building","Hospital"),
+            title = "Type of building",
+            position = "bottomright") %>% 
+  leaflet.extras::addResetMapButton()
+
+```
+
+<img src="../Visualisations/UNOSAT Interactive Map.html" align="left"/>
+
+```{r, echo=FALSE}
+library(htmltools)
+htmltools::tags$iframe(title = "../Visualisations/UNOSAT Interactive Map.html", src = "embedded_file.html")
+```
+
 As the visualisation demonstrates the vast majority of buildings (10,732) are simply labelled "Building (General / Default)" and I wondered whether it was possible to find out further details using reverse geocoding. Using the GeoCage API, I looked up the latitude and longitude coordinates for each damaged building and extracted the [formatted](https://opencagedata.com/api#formatted) component of the response object which in some cases contained additional address details. After I exhausted my daily request limit (2500 queries) I noticed there were only 99 unique entries which didn't contain the unhelpful "unnamed road" text so I didn't add this new information to the dataframe. However it might to be interesting to explore whether other APIS could provide additional data. and if there are other fields of the GeoCage API which could be useful.
 
 ```{r, eval=FALSE}
@@ -523,13 +695,9 @@ raqqa_gif2 <- list.files(path = "../Sentinel 2A Imagery/", pattern = "*.png", fu
   image_write("raqqa2.gif") 
 
 ```
+
 ## Conclusion
 
-While the project suceeded in visualising the position of the strikes using UNOSAT data; writing a function to easily download Sentinel-2 imagery and downloading and creating an animated GIF of the images, I would appreciate the opportunity to develop the project further ideally as part of a machine learning seminar paper. It would also like to refine the function to download data from Sentinel-1 as this would allow a machine learning model to be trained with polarisation and phase data too. Initially I thought I would like to try to exactly replicate Amnesty International's Strike Project using machine learning on medium resolution satellite imagery, however there are many possibilities. The methodology could potentially be applied identifying destruction in the recent earthquake in Turkey/Syria or mapping conflict in a completely different terrain for example during the recent violence in Sudan. It might also be interesting to explore if the satellite data on building destruction could be enriched with information from newspaper articles, other geocoding APIs or social media (Geotagged tweets).
-\
+While the project suceeded in visualising the position of the strikes using UNOSAT data; writing a function to easily download Sentinel-2 imagery and downloading and creating an animated GIF of the images, I would appreciate the opportunity to develop the project further ideally as part of a machine learning seminar paper. It would also like to refine the function to download data from Sentinel-1 as this would allow a machine learning model to be trained with polarisation and phase data too. Initially I thought I would like to try to exactly replicate Amnesty International's Strike Project using machine learning on medium resolution satellite imagery, however there are many possibilities. The methodology could potentially be applied identifying destruction in the recent earthquake in Turkey/Syria or mapping conflict in a completely different terrain for example during the recent violence in Sudan. It might also be interesting to explore if the satellite data on building destruction could be enriched with information from newspaper articles, other geocoding APIs or social media (Geotagged tweets).\
 
 \
-
-```{r cars}
-summary(cars)
-```
