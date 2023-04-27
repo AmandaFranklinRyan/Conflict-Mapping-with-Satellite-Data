@@ -8,11 +8,11 @@
               "type": "Polygon",
               "coordinates": [
                 [
-                  [38.93641, 35.92829],
-                  [39.05947, 35.92829],
-                  [39.05947, 35.9745],
-                  [38.93641, 35.9745],
-                  [38.93641, 35.92829]
+                  [InsertMinLong, InsertMinLat],
+                  [InsertMaxLong, InsertMinLat],
+                  [InsertMaxLong, InsertMaxLat],
+                  [InsertMinLong, InsertMaxLat],
+                  [InsertMinLong, InsertMinLat]
                 ]
               ]
             }
