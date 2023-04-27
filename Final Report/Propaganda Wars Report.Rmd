@@ -212,6 +212,41 @@ It was also necessary to specify the dimensions of the returned images as select
   # Calculate width of output image based on user defined pixel height
   pixels_dimensions_width= round(normalised_lat_km*pixels_dimensions_height)
 ```
+Finally the date the image was taken was added to the image, this was simple as the date (current_date) was already saved in memory.
+
+```{r, eval=FALSE}
+ ### Annotate png with Date---
+  
+#Extract date parameters to display
+  year <- lubridate::year(current_date_start)
+  month <- lubridate::month(current_date_start, label=TRUE)
+  day <- lubridate::day(current_date_start)
+  
+  complete_date <- paste(day, month, year, sep=" ")
+  
+  processed_png <- image_read(data_filename)
+  annotated_png <- image_annotate(processed_png, complete_date,location = "+10+450", size = 30, color = "white")
+```
+### Data Visualisation: Coalition Airstrikes Against Raqqa: May-October 2017
+
+Using this tutorial an animated GIF was created from the downloaded satellite imagery showing a stop animation of the 4-month bombardment of Raqqa.
+
+<img src="C:\Users\amand\OneDrive\Bureau\Conflict Mapping using Satellite Imagery\raqqa2.gif" align="left"/>
+
+```{r gapgif, eval=FALSE}
+library(dplyr)
+library(purrr) 
+library(magick) #For animation
+
+
+raqqa_gif2 <- list.files(path = "../Sentinel 2A Imagery/", pattern = "*.png", full.names = T) %>% 
+  map(image_read) %>% 
+  image_join() %>% 
+  image_annotate("Airstrikes on Raqqa, May 2017: November 2017", location = "+10+10", size = 20, color = "white")%>%
+  image_animate(fps=1) %>% #controls speed of animation
+  image_write("raqqa2.gif") 
+
+```
 
 
 \
