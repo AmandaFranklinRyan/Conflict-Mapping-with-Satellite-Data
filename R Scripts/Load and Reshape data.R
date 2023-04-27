@@ -2,11 +2,20 @@ library(rgdal) # loading spacial data
 library(sp)
 library(raster)
 library(dplyr)
+library(data.table)
 
 # Load and view dataset
 directory <- "UNOSAT Data/RaqqaDamage"
 raqqa_data <- rgdal::readOGR(directory,"Damage_Sites_Raqqa_CDA")
-View(head(raqqa_data,30))
+head_raqqa_data <- head(raqqa_data,10)
+
+unique(raqqa_data$ConfId5)
+
+head_raqqa_data_table <- as.data.table(head_raqqa_data)
+formatted_head_raqqa <- formattable(head_raqqa_data_table, 
+                               align=c("l","l"))
+
+saveRDS(formatted_head_raqqa,"Visualisations/head_original_raqqa_data.rds")
 
 raqqa_data@data$SiteID
 

@@ -40,7 +40,8 @@ rownames(transpose) <- seq(from=1, to=length(list_extra_info), by=1)
 
 #Filter for useful additional information by dropping all rows that contain only "unnamed road"
 filtered_address_info <- transpose %>% 
-  filter(!str_detect(t.extra_data_dataframe., "unnamed road"))
+  filter(!str_detect(t.extra_data_dataframe., "unnamed road")) %>% 
+  distinct()
 
 #Export final list of additional information
 saveRDS(filtered_address_info,"Visualisations/filtered address info.rds")
