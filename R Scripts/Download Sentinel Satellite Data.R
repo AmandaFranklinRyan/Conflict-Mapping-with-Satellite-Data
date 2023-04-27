@@ -63,8 +63,10 @@ for (i in 0:number_periods-1){
   ### Create cloud cover parameter of request body----------
   request_with_cloudcover <- str_replace(request_with_satellite, "InsertCloudCoverHere", cloud_cover)
   
-  ### Create cloud cover parameter of request body----------
-  
+  ### Create region of interest parameter of request body----------
+  # Easiest to specify region of interest using maximum and minimum longitude and latitude
+  # Specifying bounding box in this way didn't seem to work, instead used polygons parameter
+  # Polygons specifies a series of coordinates, the same coordinate is specified at the start and end to close the polygon
   
   sentinel_endpoint <- "https://services.sentinel-hub.com/api/v1/process"
   
@@ -77,11 +79,21 @@ for (i in 0:number_periods-1){
   # get the content as a png
   rawPng = content(response)
   
+  #Annotate png with Date
+  
   #Display png
   #grid::grid.raster(rawPng)
   
+  year <- lubridate::year(start_date)
+  month <- lubridate::month(start_date, label=TRUE)
+  day <- lubridate::day(start_date)
+  
+  complete_date <- paste(day, month, year, sep=" ")
+  
+  annotated_png <- image_annotate(rawPng, complete_date,location = "+450+10", size = 30, color = "white")
+  
   #Save to file
-  png::writePNG(rawPng, target=data_filename)
+  png::writePNG(annotated_png , target=data_filename)
 }
 
 
