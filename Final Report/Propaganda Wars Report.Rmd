@@ -34,11 +34,23 @@ Amnesty International enlisted thousands of digital activists to analyse a serie
 
 This project aims to collect the dataset necessary to replicate Amnesty's Strike Tracker Project. However instead of using high resolution human labelled satellite images, medium resolution Sentinel-1 and Sentinel-2 images will be downloaded and in a future seminar paper (hopefully) used to investigate the efficacy of using machine learning methods to automatically detect building damage and to generate a destruction timeline using a simplified version of the methodology described in x. More specifically the project will:
 
--   Identify and download suitable Sentinel-2 satellite images from the SentinelHub API, an R function will also be written to simplify this process
-
 -   Collect and visualise data from UNOSAT illustrating the position of the coalition strikes (for the purposes of the future machine learning model this represents the ground truth)
 
+-   Identify and download suitable Sentinel-2 satellite images from the SentinelHub API, an R function will also be written to simplify this process
+
 -   Create a GIF animation with the downloaded satellite data illustrating the destruction of Raqqa
+
+## Position of Coalition Strikes: UNOSAT Data
+
+Since 2001 the [United Nations Satellite Centre](https://unosat.org/products/) (UNOSAT) has published and analysed geospatial data on climate change, natural disaster and conflict including this [2017 dataset](https://unosat.org/products/1156) on the buildings destroyed by the US-Coalition bombing of Raqqa The shape file contains data taken from five different sets of satellite images from (2013-2015) and includes information on the level of damage (moderate, severe, destroyed); position of the damaged building (latitude, longitude, neighbourhood) and the confidence level in the degree of destruction (Very high, medium, uncertain). It also contains a SiteID column with further information on the nature of the destroyed building (church, university, stadium etc) However the vast majority of buildings are simply labelled "Building (General / Default)". Building destruction has been manually labelled using imagery from the [Pleiades](https://apollomapping.com/pleiades-1-satellite-imagery?gad=1&gclid=CjwKCAjwuqiiBhBtEiwATgvixGBzuGo5Zg4tzpBz0dGRlgkrIHT0QdAfhkbCYzheyUy2ULL6WlvC9xoCR6gQAvD_BwE), [Worldview-2](https://earth.esa.int/eogateway/missions/worldview-2), [Worldview-1](https://earth.esa.int/eogateway/missions/worldview-1) and [Worldview-3](https://apollomapping.com/worldview-3-satellite-imagery?gad=1&gclid=CjwKCAjwuqiiBhBtEiwATgvixIVcMh2NcN7SDkaU5rc7uxCm54hdM_d4nVg09XKar6SwNh2Mtx4fjxoCQVUQAvD_BwE) satellites and has not been verified on the ground.
+
+```{r, messages=FALSE, warnings=FALSE}
+library(rio)
+library(data.table)
+summary <- rio::import("../Visualisations/head_original_raqqa_data.rds")
+summary_table <- data.table(summary)
+summary_table
+```
 
 ## Medium Resolution Satellite Data (Sentinel-1 and Sentinel-2)
 
