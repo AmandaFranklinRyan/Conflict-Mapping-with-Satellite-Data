@@ -144,8 +144,6 @@ Using a combination of [these parameters](https://docs.sentinel-hub.com/api/late
 }
 ```
 
-`{=html,class.source = 'fold-hide'} <pre style="background-color:black;><span style="color: white;">{     "input": {         "bounds": {             "properties": {                 <abbr title="Specify coordinate system">"crs"</abbr>: "http://www.opengis.net/def/crs/OGC/1.3/CRS84"             },             <abbr title="Bounding box: Coordinates illustrating region of interest">"bbox"</abbr>: [                 38.93641,                 39.05947,                 35.92829,                 35.97450             ]         },         "data": [             {                 "type": "sentinel-2-l1c",                 "dataFilter": {                     "timeRange": {                         "from": "2019-10-01T00:00:00Z",                         "to": "2019-12-31T00:00:00Z"                     },                     <abbr title="Maximum level of acceptable cloud coverage (0-100%)">"maxCloudCoverage"</abbr>:5                 }             }         ]     },     <abbr title="Specify size of downloaded images">"output":</abbr> {         "width": 2000,         "height": 2000     } },     <span style="color: white;">"evalscript"</span>: "//VERSION=3\n\nfunction setup() {\n  return {\n    input: [\"B02\", \"B03\", \"B04\"],\n    output: { \n      bands: 3,\n      sampleType: \"AUTO\" // default value - scales the output values from [0,1] to [0,255].   \n     }\n  }\n}\n\nfunction evaluatePixel(sample) {\n  return [2.5 * sample.B04, 2.5 * sample.B03, 2.5 * sample.B02]\n}" } </pre>`
-
 Ideally the POST request should be sent as a multipart form, which would allow the evalscript to be written in ordinary JSON. HoweverI was unable to do this correctly, so as a workaround escaped the entire JSON Evalscript section (using [this tool)](https://www.freeformatter.com/json-escape.html) and sent it as part of the same request. The image information was then extracted from the response object and the file saved as png.
 
 ```{r,eval=FALSE}
@@ -164,7 +162,57 @@ response <- httr::POST(sentinel_endpoint,
 
 ### Function to automatically download Sentinel-2 Data
 
-To simplify the download process
+To simplify the download process I converted this code to a function to download the Sentinel-2 data automatically. The function handles the authentication process and accepts the following arguments:
+
+```{r, eval=FALSE}
+download_satellite_data(start_date, period_length_days, number_periods, min_lat,max_lat,min_long,max_long,satellite_type,cloud_cover,pixels_dimensions_height)
+
+# Minimum and maximum latitudes and longitudes specify region of interest
+# period_length, start_date and number of periods can be combined to specify data collection period
+# For example: download_satellite_data("2017-05-01", 7, 32)
+# Would return the best cloud free image taken every week from May 2017- September 2017 (32 in total)
+# pixels_dimensions_height specifies the horizontal dimension of the output image in pixels
+
+```
+
+To make the file structure as clear as possible the JSON body of the request was stored in the separate text file ("POST body request.txt") and imported to the R file containing the function ("Download Sentinel Satellite Data.R". Str_replace() was used to replace the existing parameters with the user defined function arguments in the JSON code. str().
+
+```{r, eval=FALSE}
+  request_with_start <- str_replace(request, "InsertStartDateHere", start_date_as_string)
+  request_with_end <- str_replace(request_with_start, "InsertEndDateHere", end_date_as_string)
+  
+  ### Create satellite type parameter of request body----------
+  request_with_satellite <- str_replace(request_with_end, "InsertSatelliteTypeHere", satellite_type)
+  
+  ### Create cloud cover parameter of request body----------
+  request_with_cloudcover <- str_replace(request_with_satellite, "InsertCloudCoverHere", as.character(cloud_cover))
+```
+
+It is easiest to define the area of interest using the maximum and minimum longitudes and latitudes, however using the bbox argument in the JSON selected a much larger area than expected, so this function uses the type Polygon paramter instead. This argument takes a series of geo-coordinates and joins them up so the first and last coordinate must be the same to close the shape.
+
+It was also necessary to specify the dimensions of the returned images as selecting width and height at random led to distorted, skewed pictures. Using the code below the size of region of interest in degrees was calculated then converted to kilometres using standard formulae. By calculating the ratio of the sides of the rectangle, the optimum height width ratio was calculated and combined with the users choice of pixels_dimensions_height to define the optimal image dimensions.
+
+```{r, eval=FALSE}
+ ### Calculate optimum image size----
+  # API demands user specifies the dimensions of the output image
+  # To ensure it is not stretched, dimensions have been calculated based on user specifying desired number of pixels in horizontal direction
+  
+  # Calculate longitude and latitude differences from user input
+  latitude_diff <- max_lat-min_lat
+  longitude_diff <- max_long-min_long
+  
+  #Convert difference in latitude from degrees to km using standard conversion formula
+  lat_metres <- abs(111.32*latitude_diff)
+  long_metres <-  abs(longitude_diff*40075*cos(max_lat)/360)
+  
+  # Calculate ratio of height:length of the selected satellite image
+  normalised_lat_km <- lat_metres/long_metres
+  normalised_lat_km 
+  
+  # Calculate width of output image based on user defined pixel height
+  pixels_dimensions_width= round(normalised_lat_km*pixels_dimensions_height)
+```
+
 
 \
 
@@ -174,12 +222,4 @@ To simplify the download process
 summary(cars)
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
