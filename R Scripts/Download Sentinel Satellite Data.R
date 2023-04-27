@@ -33,8 +33,7 @@ token <- oauth2.0_token(endpoint = endpoint,
                         use_basic_auth = T,
                         client_credentials = T)
 
-### --- Build request
-
+### --- Build request in loop to get imagery for multiple dates
 
 # Specify time range for data collection
 # Good imagery is weather dependent, but sentinel-2 data collected every 5 days
@@ -47,6 +46,7 @@ for (i in 0:number_periods-1){
   request <- read_file("R Scripts/POST body request") # loads request from JSON in text file
   
   ### Create date parameters of request body----------
+  ## Code replaces strings in the JSON body request.txt with arguments from function
   current_date_start <- start_date+days(i*period_length_days)
   current_date_end <- start_date+days((i+1)*period_length_days)
   
@@ -71,8 +71,13 @@ for (i in 0:number_periods-1){
   request_with_region2 <- str_replace_all(request_with_region1, "InsertMaxLong", as.character(max_long))
   request_with_region3 <- str_replace_all(request_with_region2, "InsertMinLat", as.character(min_lat))
   request_with_region4 <- str_replace_all(request_with_region3, "InsertMaxLat", as.character(max_lat))
-  print(request_with_region4)
+  
+  ### Calculate optimum image size
+  # API demands user specifies the dimensions of the output image
+  # To ensure it is not stretched, dimensions have been calculated based on user specifying desired number of pixels in horizontal direction
+  
 
+  # Specify Sentinel endpoint
   sentinel_endpoint <- "https://services.sentinel-hub.com/api/v1/process"
   
   # Specify which formats are accepted in request(JSON) and response(png)
@@ -80,14 +85,13 @@ for (i in 0:number_periods-1){
   
   data_filename <- paste("SatelliteData",start_date_as_string,".png",sep="")
   
-  ###--- Process response into png image
-  # get the content as a png
+  ###--- Process response into png image---
+  
+  #Get the content as a png
   rawPng = content(response)
-  print(rawPng)
-  #Annotate png with Date
   png::writePNG(rawPng , target=data_filename)
-  #Display png
-  #grid::grid.raster(rawPng)
+  
+  ### Annotate png with Date---
   
   year <- lubridate::year(current_date_start)
   month <- lubridate::month(current_date_start, label=TRUE)
@@ -103,5 +107,5 @@ for (i in 0:number_periods-1){
 }
 }
 
-download_satellite_data("2017-05-01", 7, 32, 35.92829,35.9745,38.93641,39.05947,"sentinel-2-l2a",10)
+download_satellite_data("2017-05-01", 7, 3, 35.92829,35.9745,38.93641,39.05947,"sentinel-2-l2a",10)
 
