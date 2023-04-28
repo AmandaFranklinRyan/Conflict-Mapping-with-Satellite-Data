@@ -27,7 +27,7 @@ building_palette <- leaflet::colorFactor(palette=c("#00876c","#003f5c", "#85b96f
 building_only_dataframe <- coalition_strikes_2017 %>% 
   filter(SiteID=="Building (General / Default)")
 
-grouped_building_plot <-   Building_only_dataframe %>%
+grouped_building_plot <-   building_only_dataframe %>%
   leaflet()%>% 
   addProviderTiles("OpenStreetMap") %>% 
   setView(lng=39.00897, lat= 35.95394, zoom=14) %>% 

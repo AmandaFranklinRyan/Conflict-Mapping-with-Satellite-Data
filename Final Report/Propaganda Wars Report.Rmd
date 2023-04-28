@@ -9,6 +9,8 @@ output:
     toc_float: true
     theme: united
 bibliography: references.bib
+nocite: | 
+  @abirds ,@custom, @datafor, @earthsciencedatasystems2020, @freesat2019, @gomer2018, @lin2020, @https://citizenevidence.org/author/wallace-fan2023, @rao2022, @sandhiniputri2022, @whysar?, @unosat, @singh2019
 ---
 
 ```{r setup, include=FALSE}
@@ -56,8 +58,6 @@ This project aims to collect the dataset necessary to replicate Amnesty's Strike
 
 Since 2001 the [United Nations Satellite Centre](https://unosat.org/products/) (UNOSAT) has published and analysed geospatial data on climate change, natural disaster and conflict including this [2017 dataset](https://unosat.org/products/1156) on the buildings destroyed by the US-Coalition bombing of Raqqa. The shape file contains data taken from five different sets of satellite images from (2013-2015) and includes information on the level of damage (moderate, severe, destroyed); position of the damaged building (latitude, longitude, neighbourhood) and the confidence level in the degree of destruction (Very high, medium, uncertain). It also contains a SiteID column with further information on the nature of the destroyed building (church, university, stadium etc) However the vast majority of buildings are simply labelled "Building (General / Default)". Building destruction has been manually labelled using imagery from the [Pleiades](https://apollomapping.com/pleiades-1-satellite-imagery?gad=1&gclid=CjwKCAjwuqiiBhBtEiwATgvixGBzuGo5Zg4tzpBz0dGRlgkrIHT0QdAfhkbCYzheyUy2ULL6WlvC9xoCR6gQAvD_BwE), [Worldview-2](https://earth.esa.int/eogateway/missions/worldview-2), [Worldview-1](https://earth.esa.int/eogateway/missions/worldview-1) and [Worldview-3](https://apollomapping.com/worldview-3-satellite-imagery?gad=1&gclid=CjwKCAjwuqiiBhBtEiwATgvixIVcMh2NcN7SDkaU5rc7uxCm54hdM_d4nVg09XKar6SwNh2Mtx4fjxoCQVUQAvD_BwE) satellites and has not been verified on the ground.
 
-
-
 ```{r, messages=FALSE, warnings=FALSE}
 
 
@@ -68,6 +68,7 @@ formatted_table_raqqa <- formattable(summary_table, align=c("l","l"))
 formatted_table_raqqa
 
 ```
+
 ###### **Original UNOSAT data: Excerpt showing first few rows of raw data**
 
 Data has only been collected once a year from 2013-2016 and twice in 2017 so it is impossible to know the exact date a building was destroyed,. aAll that can be established is the date of the first satellite image in which it was damaged. 13155 buildings were damaged over the entire time frame, a few hundred in ad hoc airstrikes from 2013-2016, but over 10,000 in 2017. Evidently in the earlier years, buildings would have been damaged and repaired (possibly multiple times) but for the purposes of this analysis, a building can only be labelled "destroyed","severely damaged" etc. once at the first instance of damage. The dataframe was reshaped from a geospatial frame to dataframe to reflect this using the code below. In this case a spatial dataframe wasn't required as no polygon data was included.
@@ -433,7 +434,6 @@ In addition to the destruction illustrated on the interactive map, 3 churches, 5
 
 As the visualisation highlights, the vast majority of buildings (10,732) are simply labelled "Building (General / Default)" and I wondered whether it was possible to find out further details using reverse geocoding. Using the [OpenCage](https://opencagedata.com/) API, I looked up the latitude and longitude coordinates for each damaged building and extracted the [formatted](https://opencagedata.com/api#formatted) component of the response object which in some cases contained additional address details. After I exhausted my daily request limit (2500 queries) I noticed there were only 99 unique entries which didn't contain the unhelpful "unnamed road" text so I didn't add this new information to the dataframe. However it might to be interesting to explore whether other APIS could provide additional data. and if there are other fields of the OpenCage API which could be useful. I also realised at the end that changing the map base layer can give information, with OpenStreet map providing information on whether a building is a mosque, hospitals etc. Perhaps there is a more efficient way to link this information with the raw latitude and longitude coordinates.
 
-
 ```{r, eval=FALSE}
 library(httr)
 library(jsonlite)
@@ -493,6 +493,7 @@ address_info_table <- data.table(head(address_info, 5))
 formatted_info_table <- formattable(address_info_table, align=c("l","l"))
 formatted_info_table
 ```
+
 ###### **Excerpt of the additional address information found using the GeoCage API**
 
 ## Medium Resolution Satellite Data (Sentinel-1 and Sentinel-2)
@@ -526,7 +527,7 @@ Sentinel Satellite data is available free online through the following portals:
 
 The EO browser is an interface allowing registered users to easily select and download satellite imagery of regions of interest from an interactive map. Using simple drop down menus users can also select the relevant time range, level of maximum cloud coverage and type of image. Results are presented as a simple image list which not only offers the option of fusing single images into standard combinations including real colour, false colour and Normalised Difference Vegetation Index (NDVI), but also of creating custom combinations. Images can be saved, shared, pinned, downloaded and automatically woven into time lapse sequences.
 
-Alternatively Sentinel-1, 2 and 3 imagery can be downloaded via the Copernicus Hub API. The R package [sen2r](https://cran.r-project.org/web/packages/sen2r/index.html) has been written to simplify the process of accessing Sentinel-2 data, allowing users to access imagery not only via the libraries custom functions but also through a Shiny backed GUI interface. 
+Alternatively Sentinel-1, 2 and 3 imagery can be downloaded via the Copernicus Hub API. The R package [sen2r](https://cran.r-project.org/web/packages/sen2r/index.html) has been written to simplify the process of accessing Sentinel-2 data, allowing users to access imagery not only via the libraries custom functions but also through a Shiny backed GUI interface.
 
 The RESTful Sentinel Hub Process API provides full access to data from all Sentinel satellites including polarisation and phase information. Users are offered the ability to both select products and perform bespoke image processing using the platform's Javascript-based Evalscript.
 
@@ -636,7 +637,6 @@ download_satellite_data(start_date, period_length_days, number_periods, min_lat,
 
 To make the file structure as clear as possible the JSON body of the request was stored in the separate text file ("POST body request.txt") and imported to the R file containing the function ("Download Sentinel Satellite Data.R".. Str_replace() was used to replace the existing parameters with the user defined function arguments in the JSON code.
 
-
 ```{r, eval=FALSE}
   request_with_start <- str_replace(request, "InsertStartDateHere", start_date_as_string)
   request_with_end <- str_replace(request_with_start, "InsertEndDateHere", end_date_as_string)
@@ -711,6 +711,8 @@ raqqa_gif2 <- list.files(path = "../Sentinel 2A Imagery/", pattern = "*.png", fu
 
 ## Conclusion
 
-While the project suceeded in visualising the position of the strikes using UNOSAT data, writing a function to easily download Sentinel-2 imagery and downloading and creating an animated GIF of the images, I would appreciate the opportunity to develop the project further ideally as part of a machine learning seminar paper. I would also like to refine the function to download data from Sentinel-1 as this would allow a machine learning model to be trained with polarisation and phase data too. 
+While the project suceeded in visualising the position of the strikes using UNOSAT data, writing a function to easily download Sentinel-2 imagery and downloading and creating an animated GIF of the images, I would appreciate the opportunity to develop the project further ideally as part of a machine learning seminar paper. I would also like to refine the function to download data from Sentinel-1 as this would allow a machine learning model to be trained with polarisation and phase data too.
 
 Initially I thought I would like to try to exactly replicate Amnesty International's Strike Project using machine learning on medium resolution satellite imagery, however there are many possibilities. The methodology could potentially be applied identifying destruction in the recent earthquake in Turkey/Syria or mapping conflict in a completely different terrain, for example during the recent violence in Sudan. It might also be interesting to explore if the satellite data on building destruction could be enriched with information from newspaper articles, other geocoding APIs or social media (geotagged tweets).
+
+## Bibliography
