@@ -16,6 +16,12 @@ knitr::opts_chunk$set(echo = TRUE)
 library(rio)
 library(data.table)
 library(formattable)
+library(leaflet)
+library(dplyr)
+library(rio)
+library(leaflet.extras) # for extra features like adding search box and reset map button
+library(htmltools) #for escaping html
+library(widgetframe)
 ```
 
 ## Introduction
@@ -24,33 +30,33 @@ library(formattable)
 
 *"History stopped in 1936- after that, there was only propaganda"* - **George Orwell**
 
-*"We are children no more"*, 15-year-old 'Nayirah'" [tells the Congressional Caucus](https://www.youtube.com/watch?v=LmfVs3WaE9Y), blinking back tears, her voice cracking as she describes Iraqi soldiers storming the hospital where she volunteered, stealing incubators and throwing babies onto the floor to die. It's 1991, Vietnam's legacy still looms large and the American public have no desire to be embroiled in yet another distant war, but Nayirah's testimony sways them with the US invading Iraq 3-months later. Except it wasn't true, any of it. Nayirah al-Sabah, the daughter of the Kuwaiti ambassador had never set foot in the hospital, instead she was coached to perfection for her Oscar winning performance by PR firm Hill and Knowlton who were directly employed by the Kuwaiti Government.[@abuhamad1994] [@howfals]
+*"We are children no more"*, 15-year-old 'Nayirah' [tells the Congressional Caucus](https://www.youtube.com/watch?v=LmfVs3WaE9Y), blinking back tears, her voice cracking as she describes Iraqi soldiers storming the hospital where she volunteered, stealing incubators and throwing babies onto the floor to die. It's 1991 and Vietnam's legacy still looms large. The American public have no desire to be embroiled in yet another distant war, but Nayirah's testimony sways them, with the US invading Iraq 3-months later. Except it wasn't true, any of it. Nayirah al-Sabah, the daughter of the Kuwaiti ambassador had never set foot in the hospital. Instead she was [coached](https://www.democracynow.org/2018/12/5/how_false_testimony_and_a_massive.) to perfection for her Oscar winning performance by PR firm Hill and Knowlton who were [directly employed](https://www.washingtonpost.com/archive/opinions/1994/02/26/the-kuwaiti-incubator-hoax/35b1e882-f796-4acb-a106-9280a7dda521/.) by the Kuwaiti Government.
 
-Atrocity propaganda is nothing new, with lurid tales of fabricated massacres stretching back to the Crusades, but now storytelling is easier than ever before; all you need is a mobile and internet connection. There are now more hours of Syrian conflict footage online, than time elapsed since the war started.Almost five million people are currently trapped in Khartoum as Sudanese generals Abdel Fattah al-Burhan and Mohamed Hamdan Daglo vie for power and Twitter is awash with [fake footage](https://www.channelstv.com/2023/04/23/tanks-and-twitter-sudan-generals-multi-pronged-war/) taken from conflicts in Yemen, Libya and even a computer game. With most Twitter accounts geolocation data switched off, it's game on for opportunists worldwide to create and share their own realities. Even with image metadata and reverse image search, it's almost impossible to ascertain whether shared images are accurate, misrepresentative, staged or concocted by government backed bots. [DALL.E2](https://openai.com/product/dall-e-2) will only make things worse, with the potential power to conjure up bespoke atrocities in every style from gritty World War II grayscale to heartrending full colour closeup at the click of a mouse.
+Atrocity propaganda is nothing new, with lurid tales of fabricated massacres stretching back to the Crusades, but now storytelling is easier than ever before; all you need is a mobile phone and an internet connection. There are now more hours of Syrian conflict footage online than time elapsed since the war started. Almost five million people are currently trapped in Khartoum as Sudanese generals Abdel Fattah al-Burhan and Mohamed Hamdan Daglo vie for power and Twitter is awash with [fake footage](https://www.channelstv.com/2023/04/23/tanks-and-twitter-sudan-generals-multi-pronged-war/) taken from conflicts in Yemen, Libya and even a video game. With most Twitter accounts geolocation data switched off, it's game on for opportunists worldwide to create and share their own realities. Even with image metadata and reverse image search, it's almost impossible to ascertain whether shared images are accurate, misrepresentative, staged or concocted by government backed bots. [DALL.E2](https://openai.com/product/dall-e-2) will only make things worse, with the potential power to conjure up bespoke atrocities in every style from gritty World War II grayscale to heartrending full colour closeup at the click of a mouse.
 
-Yet in a world where fiction seems higher definition than reality, satellite imagery could offer a glimmer of hope. In March 2022 Ukrainians reported the rape, murder and torture of hundreds of civilians in Bucha, with bodies strewn across the streets. Unsurprisingly, the Russian Defence Ministry [immediately dismissed](https://www.aljazeera.com/news/2022/4/4/will-the-bucha-massacre-wake-up-the-world) the allegations as, "*another production of the Kyiv regime for the Western media*", blaming Ukrainian soldiers themselves for the killings. However Maxar satellite data [corroborated](https://www.bbc.com/news/60981238)the Ukrainian narrative illustrating the bodies had been present long before Ukrainian forces entered the area.
+Yet in a world where fiction seems higher definition than reality, satellite imagery could offer a glimmer of hope. In March 2022 Ukrainians reported the rape, murder and torture of hundreds of civilians in Bucha, with bodies strewn across the streets. Unsurprisingly, the Russian Defence Ministry [immediately dismissed](https://www.aljazeera.com/news/2022/4/4/will-the-bucha-massacre-wake-up-the-world) the allegations as "*another production of the Kyiv regime for the Western media*", blaming Ukrainian soldiers themselves for the killings. However Maxar satellite data [corroborated](https://www.bbc.com/news/60981238) the Ukrainian narrative, illustrating the bodies had been present long before Ukrainian forces entered the area.
 
-While [high resolution Maxar data](https://www.maxar.com/products/satellite-imagery) is only available commercially or for selected humanitarian disasters, medium resolution Sentinel-1 and Sentinel 2 satellite imagery is freely accessible online. Evidently it's no magic bullet. evidence of newly dug mass graves or bombed buildings, proves only the incident is not a recycled copy-paste of a past atrocity and in isolation can rarely identify the true perpetrator, however it is already being used in conflict mapping. Depending on the location and nature of the violence, burning oil wells; abandoning agricultural land, (pictures here) construction of refugee camps and building damage have been used to identify and monitor armed conflict. Using methods to map meteor craters on the moon, a [2020 study](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0229826)used satellite imagery combined with machine learning to identify unexploded munitions from the Vietnam War embedded in overgrown bomb craters in rural Cambodia. Detecting chemical and biological warfare with satellite imagery is [less promising](https://doi.org/10.1007/s10712-021-09637-5) due to the low concentrations of the agents in the atmosphere, however vegetation changes could potentially be use as a proxy for contamination with radioactivity and [journalists](https://www.unearthlabs.com/blogs/unearthing-north-koreas-chemical-weapons) are already using satellite pictures to investigate North Korea's chemical weapon capabilities.
+While [high resolution Maxar data](https://www.maxar.com/products/satellite-imagery) is only available commercially or for selected humanitarian disasters, medium resolution Sentinel-1 and Sentinel 2 satellite imagery is freely accessible online. Evidently it's no magic bullet. Evidence of newly dug mass graves or bombed buildings, proves only the incident is not a recycled copy-paste of a past atrocity, and in isolation can rarely identify the true perpetrator. However it is already being used in conflict mapping. Depending on the location and nature of the violence, burning oil wells, abandoning agricultural land, construction of refugee camps and building damage have been used to identify and monitor armed conflict. Using methods to map meteor craters on the moon, a [2020 study](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0229826) used satellite imagery combined with machine learning to identify unexploded munitions from the Vietnam War, embedded in overgrown bomb craters in rural Cambodia. Detecting chemical and biological warfare with satellite imagery is [less promising](https://doi.org/10.1007/s10712-021-09637-5) due to the low concentrations of the agents in the atmosphere, however vegetation changes could potentially be use as a proxy for contamination with radioactivity and [journalists](https://www.unearthlabs.com/blogs/unearthing-north-koreas-chemical-weapons) are already using satellite pictures to investigate North Korea's chemical weapon capabilities.
 
 ### Raqqa: The Perfect Perpetratorless Crime
 
-Created in 2019, Amnesty International's [Strike Tracker](https://decoders.amnesty.org/projects/strike-tracker#decode-results) used satellite imagery coupled with crowd sourced image labelling to create an accurate timeline for the 2017 US led Coalition bombing in the Syrian city of Raqqa. Attempting to destroy Islamic State's "Caliphate", Coalition forces fired over 30,000 missiles in a four-month bombardment, destroying 80% of the city and killing and injuring thousands of civilians. Pinning down responsibility was challenging as the Coalition accused ISIS, Russia blamed the US and the US denied all responsibility ruling less than one percent of civilian casualty reports "credible".[@april252019]
+Created in 2019, Amnesty International's [Strike Tracker](https://decoders.amnesty.org/projects/strike-tracker#decode-results) used satellite imagery coupled with crowd sourced image labelling to create an accurate timeline for the 2017 US led Coalition bombing in the Syrian city of Raqqa. Attempting to destroy Islamic State's "Caliphate", Coalition forces fired over 30,000 missiles in a four-month bombardment, destroying 80% of the city and killing and injuring thousands of civilians. Pinning down responsibility was challenging as the Coalition accused ISIS, Russia blamed the US and the US denied all responsibility [ruling](https://theintercept.com/2019/04/25/coalition-airstrikes-in-raqqa-killed-at-least-1600-civilians-more-than-10-times-u-s-tally-report-finds/.) less than one percent of civilian casualty reports "credible".
 
-Amnesty International enlisted thousands of digital activists to analyse a series of satellite photos of the same building to identify the exact date it was destroyed. After following a short interactive tutorial volunteers were presented with a new series of images to label. Combining the crowd sourced strike timeline with witness testimony and interviews, Amnesty forced the Coalition to admit responsibility for 159 civilian deaths.[@isconfl2019]
+Amnesty International enlisted thousands of digital activists to analyse a series of satellite photos of the same building to identify the exact date it was destroyed. After following a short interactive tutorial, volunteers were presented with a new series of images to label. Combining the crowd sourced strike timeline with witness testimony and interviews, Amnesty forced the Coalition to admit responsibility for [159 civilian deaths](https://www.bbc.com/news/world-middle-east-48044115).
 
-This project aims to collect the dataset necessary to replicate Amnesty's Strike Tracker Project. However instead of using high resolution human labelled satellite images, medium resolution Sentinel-1 and Sentinel-2 images will be downloaded and in a future seminar paper (hopefully) used to investigate the efficacy of using machine learning methods to automatically detect building damage and to generate a destruction timeline using a simplified version of the methodology described in x. More specifically the project will:
+This project aims to collect the dataset necessary to replicate Amnesty's Strike Tracker Project. However instead of using high resolution human labelled satellite images, medium resolution Sentinel-1 and Sentinel-2 images will be downloaded, and in a future seminar paper (hopefully) used to investigate the efficacy of using machine learning methods to automatically detect building damage and to generate a destruction timeline using a simplified version of the methodology described in [this](https://ethz.ch/content/dam/ethz/special-interest/baug/igp/photogrammetry-remote-sensing-dam/documents/pdf/Student_Theses/MA_BirkePfeifle.pdf) Masters thesis. More specifically the project will:
 
 -   Collect and visualise data from UNOSAT illustrating the position of the coalition strikes (for the purposes of the future machine learning model this represents the ground truth)
 
--   Identify and download suitable Sentinel-2 satellite images from the SentinelHub API, an R function will also be written to simplify this process
+-   Identify and download suitable Sentinel-2 satellite images from the SentinelHub API. An R function will also be written to simplify this process
 
 -   Create a GIF animation with the downloaded satellite data illustrating the destruction of Raqqa
 
 ## Position of Coalition Strikes: UNOSAT Data
 
-Since 2001 the [United Nations Satellite Centre](https://unosat.org/products/) (UNOSAT) has published and analysed geospatial data on climate change, natural disaster and conflict including this [2017 dataset](https://unosat.org/products/1156) on the buildings destroyed by the US-Coalition bombing of Raqqa The shape file contains data taken from five different sets of satellite images from (2013-2015) and includes information on the level of damage (moderate, severe, destroyed); position of the damaged building (latitude, longitude, neighbourhood) and the confidence level in the degree of destruction (Very high, medium, uncertain). It also contains a SiteID column with further information on the nature of the destroyed building (church, university, stadium etc) However the vast majority of buildings are simply labelled "Building (General / Default)". Building destruction has been manually labelled using imagery from the [Pleiades](https://apollomapping.com/pleiades-1-satellite-imagery?gad=1&gclid=CjwKCAjwuqiiBhBtEiwATgvixGBzuGo5Zg4tzpBz0dGRlgkrIHT0QdAfhkbCYzheyUy2ULL6WlvC9xoCR6gQAvD_BwE), [Worldview-2](https://earth.esa.int/eogateway/missions/worldview-2), [Worldview-1](https://earth.esa.int/eogateway/missions/worldview-1) and [Worldview-3](https://apollomapping.com/worldview-3-satellite-imagery?gad=1&gclid=CjwKCAjwuqiiBhBtEiwATgvixIVcMh2NcN7SDkaU5rc7uxCm54hdM_d4nVg09XKar6SwNh2Mtx4fjxoCQVUQAvD_BwE) satellites and has not been verified on the ground.
+Since 2001 the [United Nations Satellite Centre](https://unosat.org/products/) (UNOSAT) has published and analysed geospatial data on climate change, natural disaster and conflict including this [2017 dataset](https://unosat.org/products/1156) on the buildings destroyed by the US-Coalition bombing of Raqqa. The shape file contains data taken from five different sets of satellite images from (2013-2015) and includes information on the level of damage (moderate, severe, destroyed); position of the damaged building (latitude, longitude, neighbourhood) and the confidence level in the degree of destruction (Very high, medium, uncertain). It also contains a SiteID column with further information on the nature of the destroyed building (church, university, stadium etc) However the vast majority of buildings are simply labelled "Building (General / Default)". Building destruction has been manually labelled using imagery from the [Pleiades](https://apollomapping.com/pleiades-1-satellite-imagery?gad=1&gclid=CjwKCAjwuqiiBhBtEiwATgvixGBzuGo5Zg4tzpBz0dGRlgkrIHT0QdAfhkbCYzheyUy2ULL6WlvC9xoCR6gQAvD_BwE), [Worldview-2](https://earth.esa.int/eogateway/missions/worldview-2), [Worldview-1](https://earth.esa.int/eogateway/missions/worldview-1) and [Worldview-3](https://apollomapping.com/worldview-3-satellite-imagery?gad=1&gclid=CjwKCAjwuqiiBhBtEiwATgvixIVcMh2NcN7SDkaU5rc7uxCm54hdM_d4nVg09XKar6SwNh2Mtx4fjxoCQVUQAvD_BwE) satellites and has not been verified on the ground.
 
-#### **Original UNOSAT data: Excerpt showing first few rows of raw data**
+
 
 ```{r, messages=FALSE, warnings=FALSE}
 
@@ -62,8 +68,9 @@ formatted_table_raqqa <- formattable(summary_table, align=c("l","l"))
 formatted_table_raqqa
 
 ```
+###### **Original UNOSAT data: Excerpt showing first few rows of raw data**
 
-Data has only been collected once a year from 2013-2016 and twice in 2017 so it is impossible to know the exact date a building was destroyed,. all that can be established is the date of the first satellite image in which it was damaged. 13155 buildings were damaged over the entire timeframe, a few hundred in ad hoc airstrikes from 2013-2016, but over 10,000 in 2017. Evidently in the earlier years, buildings would have been damaged and repaired (possibly multiple times) but for the purposes of this analysis, a building can only be labelled "destroyed","severely damaged" etc. once at the first instance of damage. The dataframe was reshaped from a geospatial frame to dataframe to reflect this using the code below. In this case a spatial dataframe wasn't required as no polygon data was included.
+Data has only been collected once a year from 2013-2016 and twice in 2017 so it is impossible to know the exact date a building was destroyed,. aAll that can be established is the date of the first satellite image in which it was damaged. 13155 buildings were damaged over the entire time frame, a few hundred in ad hoc airstrikes from 2013-2016, but over 10,000 in 2017. Evidently in the earlier years, buildings would have been damaged and repaired (possibly multiple times) but for the purposes of this analysis, a building can only be labelled "destroyed","severely damaged" etc. once at the first instance of damage. The dataframe was reshaped from a geospatial frame to dataframe to reflect this using the code below. In this case a spatial dataframe wasn't required as no polygon data was included.
 
 ```{r, eval=FALSE}
 library(rgdal) # loading spacial data
@@ -178,7 +185,7 @@ raqqa_dataframe_reshaped <- rbind(severe_damage_dataframe, moderate_damage_dataf
 saveRDS(raqqa_dataframe_reshaped,"Datasets/Reshaped UNOSAT data.rds")
 ```
 
-For this analysis, I decided to focus exclusively on the coalition airstrikes of 2017 and was interested in visualising the type and extent of the damage, I experimented with bar charts and summaries of the number of each building destroyed (see code below), however concluded that an interactive map would be the best way to present the information using R's leaflet package.
+For this analysis, I decided to focus exclusively on the coalition airstrikes of 2017 and was interested in visualising the type and extent of the damage, I experimented with bar charts and summaries of the number of each building destroyed (see code below), however concluded that an interactive map would be the best way to present the information using R's [leaflet](https://rstudio.github.io/leaflet/) package.
 
 ```{r, eval=FALSE}
 library(dplyr)
@@ -263,13 +270,7 @@ centre_x2 <- mean(raqqa_data_summarised$coords.x2)
 
 ```
 
-```{r, eval=FALSE}
-
-library(leaflet)
-library(dplyr)
-library(rio)
-library(leaflet.extras) # for extra features like adding search box and reset map button
-library(htmltools) #for escaping html
+```{r, eval=TRUE, results='asis', warnings=FALSE, messages=FALSE}
 
 ###--- Create interactive leaflet map of Raqqa
 
@@ -291,7 +292,7 @@ building_palette <- leaflet::colorFactor(palette=c("#00876c","#003f5c", "#85b96f
 building_only_dataframe <- coalition_strikes_2017 %>% 
   filter(SiteID=="Building (General / Default)")
 
-grouped_building_plot <-   Building_only_dataframe %>%
+grouped_building_plot <-   building_only_dataframe %>%
   leaflet()%>% 
   addProviderTiles("OpenStreetMap") %>% 
   setView(lng=39.00897, lat= 35.95394, zoom=14) %>% 
@@ -425,21 +426,13 @@ grouped_building_plot <- grouped_building_plot %>%
             title = "Type of building",
             position = "bottomright") %>% 
   leaflet.extras::addResetMapButton()
-
 grouped_building_plot
-
 ```
 
-<img src="../Visualisations/UNOSAT Interactive Map.html" align="left"/>
+In addition to the destruction illustrated on the interactive map, 3 churches, 5 bridges,7 markets, an airport and the city's stadium were also damaged. Removing the "general building" destruction layer to see the other building damage more clearly illustrates that unsurprisingly most road damage is focussed on the North of the city (Barid Street and Route 6) while to the South, bridges have been targetted. A series of fields seem to have been damaged in two straight lines to the East of the city. and almost all of the city's mosques have been bombed. UNOSAT's data reports 21 hospital bombings are reported in the UNOSAT data, with the map indicating 6 direct hits on the National Hospital's buildings and 3 in the surrounding area. There are 3 other clusters of damage in data labelled "hospital" by UNOSAT, but they are not marked as hospitals on the base map. The other 5 hospitals marked on the map, including the Modern Medical Hospital, appear to be undamaged.
 
-```{r, echo=FALSE}
-library(htmltools)
-htmltools::tags$iframe(title = "../Visualisations/UNOSAT Interactive Map.html", src = "embedded_file.html")
-```
+As the visualisation highlights, the vast majority of buildings (10,732) are simply labelled "Building (General / Default)" and I wondered whether it was possible to find out further details using reverse geocoding. Using the [OpenCage](https://opencagedata.com/) API, I looked up the latitude and longitude coordinates for each damaged building and extracted the [formatted](https://opencagedata.com/api#formatted) component of the response object which in some cases contained additional address details. After I exhausted my daily request limit (2500 queries) I noticed there were only 99 unique entries which didn't contain the unhelpful "unnamed road" text so I didn't add this new information to the dataframe. However it might to be interesting to explore whether other APIS could provide additional data. and if there are other fields of the OpenCage API which could be useful. I also realised at the end that changing the map base layer can give information, with OpenStreet map providing information on whether a building is a mosque, hospitals etc. Perhaps there is a more efficient way to link this information with the raw latitude and longitude coordinates.
 
-As the visualisation demonstrates the vast majority of buildings (10,732) are simply labelled "Building (General / Default)" and I wondered whether it was possible to find out further details using reverse geocoding. Using the GeoCage API, I looked up the latitude and longitude coordinates for each damaged building and extracted the [formatted](https://opencagedata.com/api#formatted) component of the response object which in some cases contained additional address details. After I exhausted my daily request limit (2500 queries) I noticed there were only 99 unique entries which didn't contain the unhelpful "unnamed road" text so I didn't add this new information to the dataframe. However it might to be interesting to explore whether other APIS could provide additional data. and if there are other fields of the GeoCage API which could be useful.
-
-#### **Excerpt of the additional address information found using the GeoCage API**
 
 ```{r, eval=FALSE}
 library(httr)
@@ -500,18 +493,19 @@ address_info_table <- data.table(head(address_info, 5))
 formatted_info_table <- formattable(address_info_table, align=c("l","l"))
 formatted_info_table
 ```
+###### **Excerpt of the additional address information found using the GeoCage API**
 
 ## Medium Resolution Satellite Data (Sentinel-1 and Sentinel-2)
 
 ### Overview
 
-Launched by the European Space Agency in June 2015, primarily for agricultural monitoring and emergency management, [Sentinel-2](https://copernicus.eu/missions/sentinel-2.) collects land and ocean imagery to a maximum resolution of 10m every 5 days. The imagery consists of 13 spectral bands ranging from visible (red, green, blue) to near infrared (NIR) and short wave infrared (SWIR), it also includes specific frequencies for identifying vegetation (bands 5-8a) and clouds (Band 10: Cirrus).[@customs]
+Launched by the European Space Agency in June 2015, primarily for agricultural monitoring and emergency management, [Sentinel-2](https://copernicus.eu/missions/sentinel-2.) collects land and ocean imagery to a maximum resolution of 10m every 5 days. The imagery consists of [13 spectral bands](https://www.sentinel-hub.com/explore/education/custom-scripts-tutorial/.) ranging from visible (red, green, blue) to near infrared (NIR) and short wave infrared (SWIR), it also includes specific frequencies for identifying vegetation (bands 5-8a) and clouds (Band 10: Cirrus).
 
-Sentinel -1 was launched by the European Commission's Copernicus Project a year earlier in April 2014, and collects Synthetic Aperture Radar (SAR) data every 10 days. While Sentinel 2's optical sensors allow it to capture imagery from reflected sunlight, [Sentinel-1](https://copernicus.eu/missions/sentinel-1.) produces its own electromagnetic beam (with 8 bands between 0.3GHz and 40GHz) and records its reflection. The longer wavelength radar frequencies not only pass straight through clouds so can be used in any weather, but penetrate soil and sand [revealing hidden underground artefacts](https://earthobservatory.nasa.gov/features/SpaceArchaeology). Additionally, phase data can be extracted from the radar signal and used to [calculate differences](https://www.earthdata.nasa.gov/learn/backgrounders/what-is-sar.) in surface topography with an accuracy of up to a few centimetres. Combining these height difference calculations with machine learning techniques, one [2022 study](https://www.earthdata.nasa.gov/learn/backgrounders/what-is-sar.)identified buildings damaged by earthquakes.
+Sentinel -1 was launched by the European Commission's Copernicus Project a year earlier in April 2014, and collects Synthetic Aperture Radar (SAR) data every 10 days. While Sentinel 2's optical sensors allow it to capture imagery from reflected sunlight, [Sentinel-1](https://copernicus.eu/missions/sentinel-1.) produces its own electromagnetic beam (with 8 bands between 0.3GHz and 40GHz) and records its reflection. The longer wavelength radar frequencies not only pass straight through clouds so can be used in any weather, but penetrate soil and sand [revealing hidden underground artefacts](https://earthobservatory.nasa.gov/features/SpaceArchaeology). Additionally, phase data can be extracted from the radar signal and used to [calculate differences](https://www.earthdata.nasa.gov/learn/backgrounders/what-is-sar.) in surface topography with an accuracy of up to a few centimetres. Combining these height difference calculations with machine learning techniques, one [2022 study](https://www.earthdata.nasa.gov/learn/backgrounders/what-is-sar.) identified buildings damaged by earthquakes.
 
-Real colour images can be constructed by superimposing red, green and blue bands but often it is more revealing to use false colour. The optimal frequency depends on the exact nature of the task. Infrared is generally preferable for forestry mapping as soil and vegetation are difficult to differentiate in true colour imagery (as their spectral reflectances are almost identical in the visible range), however there is a difference of almost 30% in the mid-infrared band. [@customs]
+Real colour images can be constructed by superimposing red, green and blue bands but often it is more revealing to use false colour. The optimal frequency depends on the exact nature of the task. Infrared is generally preferable for forestry mapping as soil and vegetation are difficult to differentiate in true colour imagery (as their spectral reflectances are almost identical in the visible range); however there is a difference of [almost 30%](https://www.sentinel-hub.com/explore/education/custom-scripts-tutorial/.) in the mid-infrared band.
 
-Frequencies can also be combined to accentuate features of interest, blending green (band 3), red (band 4) and infrared (band 8) creates a "false colour" image amplifying the infrared band. In 2020, [Amnesty International used](https://citizenevidence.org/2023/03/21/summit-series-a-beginners-guide-to-sentinel-hub/.) false colour imagery to identify vegetation burnt by gun propellant to pinpoint the firing position of Tigray strikes on Eritrea. Hundreds of [standard combinations](https://www.indexdatabase.de/db/i.php?offset=1) exist with the majority used to highlight vegetation, its water content and the chemical composition of the surrounding soil for use in crop monitoring.The images below show the bombing of Raqqa on October 10th, 2017 in different frequency bands. The real colour image clearly shows the plume of smoke over the city, but the SWIR band (based on bands 12, 8A and 4) shows individual fires. The Normalised Difference Moisture Index (NDMI) appears bright red over the smoke indicating the low level of humidity here, the bluer sections at the edges are fields so have a higher level of moisture.
+Frequencies can also be combined to accentuate features of interest, blending green (band 3), red (band 4) and infrared (band 8) creates a "false colour" image amplifying the infrared band. In 2020, [Amnesty International used](https://citizenevidence.org/2023/03/21/summit-series-a-beginners-guide-to-sentinel-hub/.) false colour imagery to identify vegetation burnt by gun propellant to pinpoint the firing position of Tigray strikes on Eritrea. Hundreds of [standard combinations](https://www.indexdatabase.de/db/i.php?offset=1) exist with the majority used to highlight vegetation, its water content and the chemical composition of the surrounding soil for use in crop monitoring. The images below show the bombing of Raqqa on October 10th, 2017 in different frequency bands. The real colour image clearly shows the plume of smoke over the city, but the SWIR band (based on bands 12, 8A and 4) shows individual fires. The Normalised Difference Moisture Index (NDMI) appears bright red over the smoke indicating the low level of humidity here. The bluer sections are at the edges are fields so have a higher level of moisture.
 
 ```{r, echo=FALSE,out.width="33%", out.height="33%",fig.cap="Images from October 10 2017 in different frequency bands, showing real colour (left), SWIR (centre) and moisture index (right).All images were downloaded and processed using the EO Browser",fig.show='hold',fig.align='left'}
 knitr::include_graphics(c("../Visualisations/Raqqa Real Colour.png",
@@ -520,7 +514,7 @@ knitr::include_graphics(c("../Visualisations/Raqqa Real Colour.png",
                           "../Visualisations/Raqqa Water Stress.png"))
 ```
 
-To choose suitable bands for identifying building destruction, I followed a simplified version of the methodology described by Pfeiffle (2022) and Putri et al. (2022). [@sandhiniputri2022] [Conflict identification] Pfeiffle used machine learning methods to automatically identify building damage from airstrikes in Iraq and Northern Syria, choosing all Sentinel-2 images with a 10m resolution (red, green, blue and NIR). Assuming the damage profile of bombed buildings would be similar to those damaged in earthquakes, I also downloaded Sentinel-1 GRD imagery as Putri et al. concluded a fusion of Sentinel-1 and Sentinel-2 data yielded the highest accuracy in their random forest model identifying building damage from the 2018 Lombok earthquake. It would also be interesting to explore the possibility of using phase or polarisation parameters in the Sentinel-1 data to pinpoint destruction.
+To choose suitable bands for identifying building destruction, I followed a simplified version of the methodology described by [Pfeifle](https://ethz.ch/content/dam/ethz/special-interest/baug/igp/photogrammetry-remote-sensing-dam/documents/pdf/Student_Theses/MA_BirkePfeifle.pdf) (2022) and [Putri et al.](https://doi.org/10.1016/j.rsase.2022.100724) (2022). Pfeifle used machine learning methods to automatically identify building damage from airstrikes in Iraq and Northern Syria, choosing all Sentinel-2 images with a 10m resolution (red, green, blue and NIR). Assuming the damage profile of bombed buildings would be similar to those damaged in earthquakes, I also downloaded Sentinel-1 GRD imagery as Putri et al. concluded a fusion of Sentinel-1 and Sentinel-2 data yielded the highest accuracy in their random forest model identifying building damage from the 2018 Lombok earthquake. It would also be interesting to explore the possibility of using phase or polarisation parameters in the Sentinel-1 data to pinpoint destruction.
 
 ### Data Download Options
 
@@ -532,13 +526,15 @@ Sentinel Satellite data is available free online through the following portals:
 
 The EO browser is an interface allowing registered users to easily select and download satellite imagery of regions of interest from an interactive map. Using simple drop down menus users can also select the relevant time range, level of maximum cloud coverage and type of image. Results are presented as a simple image list which not only offers the option of fusing single images into standard combinations including real colour, false colour and Normalised Difference Vegetation Index (NDVI), but also of creating custom combinations. Images can be saved, shared, pinned, downloaded and automatically woven into time lapse sequences.
 
-Alternatively Sentinel-1, 2 and 3 imagery can be downloaded via the Copernicus Hub API. The R package [sen2r](https://cran.r-project.org/web/packages/sen2r/index.html) has been written to simplify the process of accessing Sentinel-2 data, allowing users to access imahergy not only via the libraries custom functions but also through a Shiny backed GUI interface. The RESTful Sentinel Hub Process API provides full access to data from all Sentinel satellites including polarisation and phase information. Users are offered the ability to both select products and perform bespoke image processing using the platform's Javascript based Evalscript. (Example of commented evalscript from code)
+Alternatively Sentinel-1, 2 and 3 imagery can be downloaded via the Copernicus Hub API. The R package [sen2r](https://cran.r-project.org/web/packages/sen2r/index.html) has been written to simplify the process of accessing Sentinel-2 data, allowing users to access imagery not only via the libraries custom functions but also through a Shiny backed GUI interface. 
+
+The RESTful Sentinel Hub Process API provides full access to data from all Sentinel satellites including polarisation and phase information. Users are offered the ability to both select products and perform bespoke image processing using the platform's Javascript-based Evalscript.
 
 Although it's possible to easily visualise, download and customise satellite imagery using EO Browser and sen2r, this project downloaded all imagery directly from the Sentinel Hub API. To use satellite data in a potential machine learning project I wanted to create an efficient data pipeline to collect and process large numbers of satellite photos without scrolling through multiple images manually via the browser. The sen2R package does offer this functionality but only for Sentinel-2 data, also it requires sci hub log-in which is only activated one week after registration (and would have made meeting this deadline impossible :))
 
 ### Accessing the Sentinel Hub API
 
-Configuring the OAUTH 2.0 authorisation in R was a challenging task, first it was necessary to register for a client ID and secret then create an oauth app to generate a token (which is valid for 1 hour) The Sentinal API requires a POST request specifying the endpoint and request body. The`{r, eval=FALSE} add_headers` argument must also be set, requiring: png images are returned `{r, eval=FALSE} Accept`;the body request will be sent in JSON `{r, eval=FALSE} Content-Type` and specifying the necessary authorisation parameters.
+Configuring the OAUTH 2.0 authorisation in R was a challenging task. First it was necessary to register for a client ID and secret then create an oauth app to generate a token (which is valid for 1 hour). The Sentinal API requires a POST request specifying the endpoint and request body. The`{r, eval=FALSE} add_headers` argument must also be set, requiring png images are returned `{r, eval=FALSE} Accept`; the body request will be sent in JSON `{r, eval=FALSE} Content-Type` and specifying the necessary authorisation parameters.
 
 ```{r, eval=FALSE}
 library(httr)
@@ -607,7 +603,7 @@ Using a combination of [these parameters](https://docs.sentinel-hub.com/api/late
 }
 ```
 
-Ideally the POST request should be sent as a multipart form, which would allow the evalscript to be written in ordinary JSON. HoweverI was unable to do this correctly, so as a workaround escaped the entire JSON Evalscript section (using [this tool)](https://www.freeformatter.com/json-escape.html) and sent it as part of the same request. The image information was then extracted from the response object and the file saved as png.
+Ideally the POST request should be sent as a multipart form, which would allow the evalscript to be written in ordinary JSON. However I was unable to do this correctly, so as a workaround I escaped the entire JSON Evalscript section (using [this tool)](https://www.freeformatter.com/json-escape.html) and sent it as part of the same request. The image information was then extracted from the response object and the file saved as png.
 
 ```{r,eval=FALSE}
 ### --- Build request
@@ -638,7 +634,8 @@ download_satellite_data(start_date, period_length_days, number_periods, min_lat,
 
 ```
 
-To make the file structure as clear as possible the JSON body of the request was stored in the separate text file ("POST body request.txt") and imported to the R file containing the function ("Download Sentinel Satellite Data.R". Str_replace() was used to replace the existing parameters with the user defined function arguments in the JSON code. str().
+To make the file structure as clear as possible the JSON body of the request was stored in the separate text file ("POST body request.txt") and imported to the R file containing the function ("Download Sentinel Satellite Data.R".. Str_replace() was used to replace the existing parameters with the user defined function arguments in the JSON code.
+
 
 ```{r, eval=FALSE}
   request_with_start <- str_replace(request, "InsertStartDateHere", start_date_as_string)
@@ -651,9 +648,9 @@ To make the file structure as clear as possible the JSON body of the request was
   request_with_cloudcover <- str_replace(request_with_satellite, "InsertCloudCoverHere", as.character(cloud_cover))
 ```
 
-It is easiest to define the area of interest using the maximum and minimum longitudes and latitudes, however using the bbox argument in the JSON selected a much larger area than expected, so this function uses the type **Polygon** parameter instead. This argument takes a series of geo-coordinates and joins them up so the first and last coordinate must be the same to close the shape.
+It is easiest to define the area of interest using the maximum and minimum longitudes and latitudes, however using the bbox argument in the JSON selected a much larger area than expected. To solve this, the function uses the type **Polygon** parameter instead. This argument takes a series of geo-coordinates and joins them up so the first and last coordinate must be the same to close the shape.
 
-It was also necessary to specify the dimensions of the returned images as selecting width and height at random led to distorted, skewed pictures. Using the code below the size of region of interest in degrees was calculated then converted to kilometres using standard formulae. By calculating the ratio of the sides of the rectangle, the optimum height width ratio was calculated and combined with the user's choice of pixels_dimensions_height to define the optimal image dimensions.
+It was also necessary to specify the dimensions of the returned images, as selecting width and height at random led to distorted, skewed pictures. Using the code below the size of region of interest in degrees was calculated then converted to kilometres using standard formulae. By calculating the ratio of the sides of the rectangle, the optimum height width ratio was calculated and combined with the user's choice of pixels_dimensions_height to define the optimal image dimensions.
 
 ```{r, eval=FALSE}
  ### Calculate optimum image size----
@@ -676,7 +673,7 @@ It was also necessary to specify the dimensions of the returned images as select
   pixels_dimensions_width= round(normalised_lat_km*pixels_dimensions_height)
 ```
 
-Finally the date the image was taken was added to the image, this was simple as the date (current_date) was already saved in memory. The function was then used to download 32 real colour satellite images from May-November 2017 with a maximum cloud cover of 10%.
+Finally the date the image was taken was added to the image .This was simple as the date (current_date) was already saved in memory. The function was then used to download 32 real colour satellite images from May-November 2017 with a maximum cloud cover of 10%.
 
 ```{r, eval=FALSE}
  ### Annotate png with Date---
@@ -694,7 +691,7 @@ Finally the date the image was taken was added to the image, this was simple as 
 
 ### Data Visualisation: Coalition Airstrikes Against Raqqa: May-October 2017
 
-Using [this tutorial](file:///C:/Users/amand/Zotero/storage/WBTPXVZT/how-to-build-a-gif-of-satellite-imagery-in-r.html) an animated GIF was created from the downloaded satellite imagery showing a stop animation of the 4-month bombardment of Raqqa.The animation clearly shows the destruction of the city starting in the suburbs in the North West of the city and gradually moving towards the centre. On October 9th a huge plume of black smoke is clearly visible.
+Using [this tutorial](file:///C:/Users/amand/Zotero/storage/WBTPXVZT/how-to-build-a-gif-of-satellite-imagery-in-r.html) an animated GIF was created from the downloaded satellite imagery showing a stop animation of the 4-month bombardment of Raqqa. The animation clearly shows the destruction of the city starting in the suburbs in the North West of the city and gradually moving towards the centre. On October 9th a huge plume of black smoke is clearly visible.
 
 <img src="../Visualisations/raqqa2.gif" align="left"/>
 
@@ -714,6 +711,6 @@ raqqa_gif2 <- list.files(path = "../Sentinel 2A Imagery/", pattern = "*.png", fu
 
 ## Conclusion
 
-While the project suceeded in visualising the position of the strikes using UNOSAT data; writing a function to easily download Sentinel-2 imagery and downloading and creating an animated GIF of the images, I would appreciate the opportunity to develop the project further ideally as part of a machine learning seminar paper. It would also like to refine the function to download data from Sentinel-1 as this would allow a machine learning model to be trained with polarisation and phase data too. Initially I thought I would like to try to exactly replicate Amnesty International's Strike Project using machine learning on medium resolution satellite imagery, however there are many possibilities. The methodology could potentially be applied identifying destruction in the recent earthquake in Turkey/Syria or mapping conflict in a completely different terrain for example during the recent violence in Sudan. It might also be interesting to explore if the satellite data on building destruction could be enriched with information from newspaper articles, other geocoding APIs or social media (Geotagged tweets).\
+While the project suceeded in visualising the position of the strikes using UNOSAT data, writing a function to easily download Sentinel-2 imagery and downloading and creating an animated GIF of the images, I would appreciate the opportunity to develop the project further ideally as part of a machine learning seminar paper. I would also like to refine the function to download data from Sentinel-1 as this would allow a machine learning model to be trained with polarisation and phase data too. 
 
-\
+Initially I thought I would like to try to exactly replicate Amnesty International's Strike Project using machine learning on medium resolution satellite imagery, however there are many possibilities. The methodology could potentially be applied identifying destruction in the recent earthquake in Turkey/Syria or mapping conflict in a completely different terrain, for example during the recent violence in Sudan. It might also be interesting to explore if the satellite data on building destruction could be enriched with information from newspaper articles, other geocoding APIs or social media (geotagged tweets).
