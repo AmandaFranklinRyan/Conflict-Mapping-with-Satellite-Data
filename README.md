@@ -1,6 +1,6 @@
 # Conflict-Mapping-with-Satellite-Data
 
-This repository contains downloaded data from UNOSAT and Sentinel-2 satellites for use in a future machine learning project to automatically identify building destruction in the Syrian city of Raqqa after the American Coalition bombing in 2017.It contains:
+This repository contains downloaded data from UNOSAT and Sentinel-2 satellites for use in a future machine learning project to automatically identify building destruction in the Syrian city of Raqqa after the American Coalition bombing in 2017. It contains:
 
 **R Scripts**
 
@@ -23,5 +23,9 @@ This repository contains downloaded data from UNOSAT and Sentinel-2 satellites f
 -   raqqa2: Animated GIF made from downloaded satellite images showing damage to Raqqa
 
 -   UNOSAT interactive map: Interactive map of UNOSAT damage showing the types of buildings damaged
+
+    **Final Report**
+
+-   Propaganda Wars Report: Background and project methodology document with interactive map and GIF
 
     The **Sentinel 2A** and **Sentinel 2LC** libraries contain the downloaded satellite imagery

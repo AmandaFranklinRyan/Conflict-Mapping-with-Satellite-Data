@@ -5,11 +5,17 @@ date: "2023-04-25"
 output:
   html_document:
     code_folding: hide
+    toc: true
+    toc_float: true
+    theme: united
 bibliography: references.bib
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(rio)
+library(data.table)
+library(formattable)
 ```
 
 ## Introduction
@@ -45,11 +51,14 @@ This project aims to collect the dataset necessary to replicate Amnesty's Strike
 Since 2001 the [United Nations Satellite Centre](https://unosat.org/products/) (UNOSAT) has published and analysed geospatial data on climate change, natural disaster and conflict including this [2017 dataset](https://unosat.org/products/1156) on the buildings destroyed by the US-Coalition bombing of Raqqa The shape file contains data taken from five different sets of satellite images from (2013-2015) and includes information on the level of damage (moderate, severe, destroyed); position of the damaged building (latitude, longitude, neighbourhood) and the confidence level in the degree of destruction (Very high, medium, uncertain). It also contains a SiteID column with further information on the nature of the destroyed building (church, university, stadium etc) However the vast majority of buildings are simply labelled "Building (General / Default)". Building destruction has been manually labelled using imagery from the [Pleiades](https://apollomapping.com/pleiades-1-satellite-imagery?gad=1&gclid=CjwKCAjwuqiiBhBtEiwATgvixGBzuGo5Zg4tzpBz0dGRlgkrIHT0QdAfhkbCYzheyUy2ULL6WlvC9xoCR6gQAvD_BwE), [Worldview-2](https://earth.esa.int/eogateway/missions/worldview-2), [Worldview-1](https://earth.esa.int/eogateway/missions/worldview-1) and [Worldview-3](https://apollomapping.com/worldview-3-satellite-imagery?gad=1&gclid=CjwKCAjwuqiiBhBtEiwATgvixIVcMh2NcN7SDkaU5rc7uxCm54hdM_d4nVg09XKar6SwNh2Mtx4fjxoCQVUQAvD_BwE) satellites and has not been verified on the ground.
 
 ```{r, messages=FALSE, warnings=FALSE}
-library(rio)
-library(data.table)
+
+
 summary <- rio::import("../Visualisations/head_original_raqqa_data.rds")
-summary_table <- data.table(summary)
-summary_table
+head_summary <- head(summary,3)
+summary_table <- data.table(head_summary)
+formatted_table_raqqa <- formattable(summary_table, align=c("l","l"))
+formatted_table_raqqa
+
 ```
 
 Data has only been collected once a year from 2013-2016 and twice in 2017 so it is impossible to know the exact date a building was destroyed,. all that can be established is the date of the first satellite image in which it was damaged. 13155 buildings were damaged over the entire timeframe, a few hundred in ad hoc airstrikes from 2013-2016, but over 10,000 in 2017. Evidently in the earlier years, buildings would have been damaged and repaired (possibly multiple times) but for the purposes of this analysis, a building can only be labelled "destroyed","severely damaged" etc. once at the first instance of damage. The dataframe was reshaped from a geospatial frame to dataframe to reflect this using the code below. In this case a spatial dataframe wasn't required as no polygon data was included.
@@ -415,6 +424,8 @@ grouped_building_plot <- grouped_building_plot %>%
             position = "bottomright") %>% 
   leaflet.extras::addResetMapButton()
 
+grouped_building_plot
+
 ```
 
 <img src="../Visualisations/UNOSAT Interactive Map.html" align="left"/>
@@ -478,11 +489,12 @@ saveRDS(filtered_address_info,"Visualisations/filtered address info.rds")
 ```
 
 ```{r, messages=FALSE, warnings=FALSE}
-library(rio)
-library(data.table)
-address_info <- rio::import("../Visualisations/filtered address info.rds")
+
+address_info  <- rio::import("../Visualisations/filtered address info.rds")
+colnames(address_info) <- c("Additional Address Information")
 address_info_table <- data.table(head(address_info, 5))
-address_info_table
+formatted_info_table <- formattable(address_info_table, align=c("l","l"))
+formatted_info_table
 ```
 
 ## Medium Resolution Satellite Data (Sentinel-1 and Sentinel-2)
@@ -497,7 +509,7 @@ Real colour images can be constructed by superimposing red, green and blue bands
 
 Frequencies can also be combined to accentuate features of interest, blending green (band 3), red (band 4) and infrared (band 8) creates a "false colour" image amplifying the infrared band. In 2020, [Amnesty International used](https://citizenevidence.org/2023/03/21/summit-series-a-beginners-guide-to-sentinel-hub/.) false colour imagery to identify vegetation burnt by gun propellant to pinpoint the firing position of Tigray strikes on Eritrea. Hundreds of [standard combinations](https://www.indexdatabase.de/db/i.php?offset=1) exist with the majority used to highlight vegetation, its water content and the chemical composition of the surrounding soil for use in crop monitoring.The images below show the bombing of Raqqa on October 10th, 2017 in different frequency bands. The real colour image clearly shows the plume of smoke over the city, but the SWIR band (based on bands 12, 8A and 4) shows individual fires. The Normalised Difference Moisture Index (NDMI) appears bright red over the smoke indicating the low level of humidity here, the bluer sections at the edges are fields so have a higher level of moisture.
 
-```{r, echo=FALSE,out.width="33%", out.height="33%",fig.cap="Images from October 10 2017 in different frequency bands, showing real colour (left), SWIR (centre) and moisture index (right)",fig.show='hold',fig.align='left'}
+```{r, echo=FALSE,out.width="33%", out.height="33%",fig.cap="Images from October 10 2017 in different frequency bands, showing real colour (left), SWIR (centre) and moisture index (right).All images were downloaded and processed using the EO Browser",fig.show='hold',fig.align='left'}
 knitr::include_graphics(c("../Visualisations/Raqqa Real Colour.png",
                           "../Visualisations/Raqqa SWIR.png",
                           

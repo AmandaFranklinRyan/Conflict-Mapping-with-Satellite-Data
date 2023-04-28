@@ -5,8 +5,9 @@ library(dplyr)
 library(rio)
 library(leaflet.extras) # for extra features like adding search box and reset map button
 library(htmltools) #for escaping html
+library(htmlwidgets)
 
-###--- Create interactive leaflet map of Raqqa
+###--- Create "interactive leaflet map of Raqqa
 
 ###--- Import UNOSAT data and focus on October 2017 (Coalition bombing)
 unosat_data <- rio::import("Datasets/Reshaped UNOSAT data.rds")
@@ -160,3 +161,6 @@ grouped_building_plot <- grouped_building_plot %>%
             title = "Type of building",
             position = "bottomright") %>% 
   leaflet.extras::addResetMapButton()
+
+saveWidget(grouped_building_plot, file="interactive_UNOSAT.html")
+
