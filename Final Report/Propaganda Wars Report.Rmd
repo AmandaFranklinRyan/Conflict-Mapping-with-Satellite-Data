@@ -50,6 +50,8 @@ This project aims to collect the dataset necessary to replicate Amnesty's Strike
 
 Since 2001 the [United Nations Satellite Centre](https://unosat.org/products/) (UNOSAT) has published and analysed geospatial data on climate change, natural disaster and conflict including this [2017 dataset](https://unosat.org/products/1156) on the buildings destroyed by the US-Coalition bombing of Raqqa The shape file contains data taken from five different sets of satellite images from (2013-2015) and includes information on the level of damage (moderate, severe, destroyed); position of the damaged building (latitude, longitude, neighbourhood) and the confidence level in the degree of destruction (Very high, medium, uncertain). It also contains a SiteID column with further information on the nature of the destroyed building (church, university, stadium etc) However the vast majority of buildings are simply labelled "Building (General / Default)". Building destruction has been manually labelled using imagery from the [Pleiades](https://apollomapping.com/pleiades-1-satellite-imagery?gad=1&gclid=CjwKCAjwuqiiBhBtEiwATgvixGBzuGo5Zg4tzpBz0dGRlgkrIHT0QdAfhkbCYzheyUy2ULL6WlvC9xoCR6gQAvD_BwE), [Worldview-2](https://earth.esa.int/eogateway/missions/worldview-2), [Worldview-1](https://earth.esa.int/eogateway/missions/worldview-1) and [Worldview-3](https://apollomapping.com/worldview-3-satellite-imagery?gad=1&gclid=CjwKCAjwuqiiBhBtEiwATgvixIVcMh2NcN7SDkaU5rc7uxCm54hdM_d4nVg09XKar6SwNh2Mtx4fjxoCQVUQAvD_BwE) satellites and has not been verified on the ground.
 
+#### **Original UNOSAT data: Excerpt showing first few rows of raw data**
+
 ```{r, messages=FALSE, warnings=FALSE}
 
 
@@ -436,6 +438,8 @@ htmltools::tags$iframe(title = "../Visualisations/UNOSAT Interactive Map.html", 
 ```
 
 As the visualisation demonstrates the vast majority of buildings (10,732) are simply labelled "Building (General / Default)" and I wondered whether it was possible to find out further details using reverse geocoding. Using the GeoCage API, I looked up the latitude and longitude coordinates for each damaged building and extracted the [formatted](https://opencagedata.com/api#formatted) component of the response object which in some cases contained additional address details. After I exhausted my daily request limit (2500 queries) I noticed there were only 99 unique entries which didn't contain the unhelpful "unnamed road" text so I didn't add this new information to the dataframe. However it might to be interesting to explore whether other APIS could provide additional data. and if there are other fields of the GeoCage API which could be useful.
+
+#### **Excerpt of the additional address information found using the GeoCage API**
 
 ```{r, eval=FALSE}
 library(httr)
